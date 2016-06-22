@@ -144,7 +144,8 @@ function postNewGame(data, successCallback, errorCallback) {
         url: server + 'API/games/',
         method: 'POST',
         headers: {
-            'Authorization': 'Token ' + token
+            'Authorization': 'Token ' + token,
+            contentType: 'application/json'
         },
         data: data,
         beforeSend: function () {
@@ -793,7 +794,7 @@ function openNewGameDialog() {
                                             });
 
                                             console.log(data);
-                                            postNewGame(data, function(){console.log('success')});
+                                            postNewGame(data);
                                             // TODO: POST THE GAME TO SERVER, UPDATE GAMES LIST ON SUCCESS
                                         }
                                     }),
