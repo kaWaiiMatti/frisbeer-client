@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="Frisbeer ELO API client" />
+	<meta name="keywords" content="frisbeer, api, client, responsive" />
+
+    <title>Frisbeer ELO client</title>
+
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap-theme.css">
+    <link rel="stylesheet" type="text/css" href="css/client.css">
+
+    <script src="js/jquery-2.2.4.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <!-- <script src="js/jquery.dataTables.min.js"></script> -->
+    <script src="js/client.js"></script>
+</head>
+
+<header>
+    <button class="btn btn-primary float-left" data-toggle-menu="true">
+        <span class="glyphicon glyphicon-menu-hamburger"></span>
+    </button>
+    <h4 class="title float-right">Frisbeer ELO</h4>
+</header>
+
+<body>
+    <div class="side-menu">
+        <ul class="menu-items">
+            <li><a data-target-tab="home">Home</a></li>
+            <li><a data-target-tab="players">Players</a></li>
+            <li><a data-target-tab="games">Games</a></li>
+            <li><a data-target-tab="logout" data-logged-in="true">Logout</a></li>
+        </ul>
+    </div>
+
+    <div class="container-fluid">
+        <div id="home" data-header-text="Frisbeer ELO">
+            <div class="row" data-logged-in="false">
+                <div class="col-xs-12">
+                    <form>
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input id="username" class="form-control" type="text" />
+                            <label for="password">Password</label>
+                            <input id="password" class="form-control" type="password" />
+                        </div>
+                    </form>
+                    <button id="login" class="btn btn-primary float-right">Login</button>
+                    <p class="help-block"></p>
+                </div>
+            </div>
+            <div class="row" data-logged-in="true">
+                <div class="col-xs-12">
+                    <p class="text-center">Logged in as <span data-field="username"></span></p>
+                    <button id="logout" class="btn btn-primary center-block">Logout</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="players" data-header-text="Players">
+
+            <button id="refresh-players" class="btn btn-primary float-right">Refresh</button>
+            <button id="add-new-player" class="btn btn-primary float-right" data-logged-in="true">Add new player</button>
+
+            <div class="row">
+                <div class="col-xs-12">
+                    <h3>Players</h3>
+                    <table id="players-table" class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>ELO</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="games" data-header-text="Games">
+            <button id="refresh-games" class="btn btn-primary float-right">Refresh</button>
+            <button id="add-new-game" class="btn btn-primary float-right" data-logged-in="true">Play game</button>
+
+            <div class="row">
+                <div class="col-xs-12">
+                    <h3>Games</h3>
+                    <table id="games-table" class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Played</th>
+                                <th>Team 1</th>
+                                <th>Team 2</th>
+                                <th>Score</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
