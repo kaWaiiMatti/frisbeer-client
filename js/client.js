@@ -929,7 +929,7 @@ function calculateTeams(players) {
     if (best.team1.length > 1) {
         result.push(best.team1[Math.floor(Math.random() * best.team1.length)]);
     } else {
-        result.push(best.team1);
+        result.push(best.team1[0]);
     }
 
     result.push($.grep(players, function (p) {
