@@ -64,10 +64,11 @@ function postNewPlayer(param, successCallback, errorCallback) {
     $.ajax({
         url: server + 'API/players/',
         method: 'POST',
+        contentType: 'application/json',
         headers: {
             'Authorization': 'Token ' + token
         },
-        data: param,
+        data: JSON.stringify(param),
         beforeSend: function () {
             // TODO: do something
         },
@@ -143,11 +144,11 @@ function postNewGame(data, successCallback, errorCallback) {
     $.ajax({
         url: server + 'API/games/',
         method: 'POST',
+        contentType: 'application/json',
         headers: {
-            'Authorization': 'Token ' + token,
-            contentType: 'application/json'
+            'Authorization': 'Token ' + token
         },
-        data: data,
+        data: JSON.stringify(data),
         beforeSend: function () {
             // TODO: do something
         },
