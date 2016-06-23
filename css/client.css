@@ -1,5 +1,5 @@
 body {
-    padding-top: 55px;
+    padding-top: 60px;
 }
 
 html {
@@ -11,6 +11,10 @@ html,
 .container-fluid,
 .container-fluid > div {
     height: 100%;
+}
+
+.container-fluid > div {
+    padding-top: 15px;
 }
 
 /* MODALS */
@@ -53,7 +57,9 @@ button.float-right + button.float-right {
 /* HEADER */
 header {
     background-color: white;
-    height: 50px;
+    border-color: #204d74;
+    border-bottom-style: solid;
+    height: 60px;
     padding: 11px 15px;
     position: fixed;
     top: 0;
@@ -68,8 +74,10 @@ header {
 
 /* MENU */
 .side-menu {
-    background-color: #204d74;
-    height: 100%;
+    background-color: white;
+    border-color: #204d74;
+    border-right-style: solid;
+    height: calc(100% - 60px);
     left: -100%;
     overflow: hidden;
     position: fixed;
@@ -85,13 +93,19 @@ header {
 
 .side-menu > ul.menu-items {
     list-style-type: none;
-    padding: 15px;
+    padding-left: 0;
+}
+
+.side-menu > ul.menu-items > li + li {
+    border-top-color: lightgrey;
+    border-top-style: solid;
+    border-top-width: 1px;
 }
 
 .side-menu > ul.menu-items > li > a {
-    color: #ffffff;
+    color: black;
     display: block;
-    padding: 5px 10px;
+    padding: 15px 10px;
     text-align: center;
 }
 
