@@ -222,7 +222,7 @@ function handleMenuClick(e) {
     var data = $(e.target).data();
     if (data.targetTab !== undefined && data.targetTab !== null) {
         if (data.targetTab === 'logout') {
-            // TODO: logout
+            openConfirmLogoutDialog();
         } else {
 
             $('.container-fluid').children().hide();
