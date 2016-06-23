@@ -298,7 +298,7 @@ function openNewPlayerDialog() {
     var dialog = $('<div>', {
         'class': 'modal fade',
         html: $('<div>', {
-            'class': 'modal-dialog modal-sm',
+            'class': 'modal-dialog',
             html: $('<div>', {
                 'class': 'modal-content',
                 html: [
@@ -409,7 +409,7 @@ function openNewGameDialog() {
         'id': 'newGameModal',
         'class': 'modal fade',
         html: $('<div>', {
-            'class': 'modal-dialog modal-sm',
+            'class': 'modal-dialog',
             html: $('<div>', {
                 'class': 'modal-content',
                 html: [
@@ -1032,7 +1032,7 @@ function openConfirmLogoutDialog() {
     var dialog = $('<div>', {
         'class': 'modal fade',
         html: $('<div>', {
-            'class': 'modal-dialog modal-sm',
+            'class': 'modal-dialog',
             html: $('<div>', {
                 'class': 'modal-content',
                 html: [

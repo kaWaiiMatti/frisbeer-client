@@ -68,7 +68,7 @@ header {
 
 @media(min-width: 768px) {
     header {
-        display: none;
+
     }
 }
 
@@ -78,13 +78,25 @@ header {
     border-color: #204d74;
     border-right-style: solid;
     height: calc(100% - 60px);
-    left: -100%;
     overflow: hidden;
-    position: fixed;
     -webkit-transition-duration: 0.5s;
     transition-duration: 0.5s;
     width: 70%;
     z-index: 10;
+}
+
+@media(max-width: 767px) {
+    .side-menu {
+        left: -100%;
+        position: fixed;
+    }
+}
+
+@media(min-width: 768px) {
+    .side-menu {
+        display: inline-block;
+        width: 200px;
+    }
 }
 
 .side-menu.open {
@@ -113,7 +125,7 @@ header {
     background-color: #8c8c8c;
 }
 
-@media(min-width: 480px) {
+@media(min-width: 480px) and (max-width: 767px) {
     .side-menu {
         width: 50%;
     }
@@ -121,11 +133,16 @@ header {
 
 @media(min-width: 768px) {
     .side-menu {
-
+        height: 100%;
     }
+}
 
-    .side-menu > ul.menu-items > li {
-        display: inline;
+@media(min-width: 768px) {
+    .container-fluid {
+        display: inline-block;
+        margin-left: 0;
+        margin-right: 0;
+        width: calc(99% - 200px);
     }
 }
 
