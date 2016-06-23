@@ -405,6 +405,7 @@ function openNewPlayerDialog() {
 
 function openNewGameDialog() {
     var dialog = $('<div>', {
+        'id': 'newGameModal',
         'class': 'modal fade',
         html: $('<div>', {
             'class': 'modal-dialog modal-sm',
@@ -795,7 +796,9 @@ function openNewGameDialog() {
                                             });
 
                                             console.log(data);
-                                            postNewGame(data);
+                                            postNewGame(data, function() {
+                                                $('#newGameModal').modal('hide');
+                                            });
                                             // TODO: POST THE GAME TO SERVER, UPDATE GAMES LIST ON SUCCESS
                                         }
                                     }),
