@@ -157,6 +157,7 @@ function postNewGame(data, successCallback, errorCallback) {
         },
         success: function (data, status, xhr) {
             updateGamesList();
+            updatePlayersList();
             if ($.isFunction(successCallback)) {
                 successCallback(data);
             }
