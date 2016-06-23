@@ -52,6 +52,7 @@ button.float-right + button.float-right {
 
 /* HEADER */
 header {
+    background-color: white;
     height: 50px;
     padding: 11px 15px;
     position: fixed;
