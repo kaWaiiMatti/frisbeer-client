@@ -95,6 +95,9 @@ function updatePlayersList(successCallback) {
             $('#players-table > tbody').append($('<tr>', {
                 'data-player-id': this.id,
                 html: [$('<td>', {
+                    'data-content': 'rank',
+                    text: this.rank
+                }),$('<td>', {
                     'data-content': 'name',
                     text: this.name
                 }), $('<td>', {
