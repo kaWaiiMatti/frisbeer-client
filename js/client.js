@@ -95,8 +95,10 @@ function updatePlayersList(successCallback) {
             $('#players-table > tbody').append($('<tr>', {
                 'data-player-id': this.id,
                 html: [$('<td>', {
+                    'data-content': 'name',
                     text: this.name
                 }), $('<td>', {
+                    'data-content': 'elo',
                     text: this.elo
                 })]
             }))
@@ -208,7 +210,7 @@ function getPlayerName(id) {
 
     $.each($('#players-table > tbody > tr'), function () {
         if ($(this).data('playerId') === id) {
-            name = $(this).eq(0).children().eq(0).text();
+            name = $(this).children('[data-content="name"]').text();
             return false;
         }
     });
@@ -823,8 +825,8 @@ function openNewGameDialog() {
     $.each($('#players-table > tbody > tr'), function () {
         players.push({
             id: $(this).data('playerId'),
-            name: $(this).children().eq(0).text(),
-            elo: parseInt($(this).children().eq(1).text())
+            name: $(this).children('[data-content="name"]').text(),
+            elo: parseInt($(this).children('[data-content="elo"]').text())
         });
     });
 
