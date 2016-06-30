@@ -2,8 +2,6 @@ var token;
 var server = 'http://127.0.0.1:8000/';
 //var server = 'https://moetto.duckdns.org/frisbeer/';
 
-var loginTextTimeout;
-
 $(document).ready(function () {
     $('.container-fluid').children().hide();
 
@@ -221,18 +219,17 @@ function getPlayerName(id) {
 function handleMenuClick(e) {
     var data = $(e.target).data();
     if (data.targetTab !== undefined && data.targetTab !== null) {
-        if (data.targetTab === 'logout') {
-            openConfirmLogoutDialog();
-        } else {
-
-            $('.container-fluid').children().hide();
-            $target = $('.container-fluid').children('#' + data.targetTab);
-            $target.show();
-            if ($target.data('headerText') !== undefined && $target.data('headerText') !== null && $target.data('headerText').length > 0) {
-                $('header .title').text($target.data('headerText'));
-            } else {
-                $('header .title').text('');
-            }
+        switch(data.targetTab) {
+            case 'login':
+                openLoginDialog();
+                break;
+            case 'logout':
+                openConfirmLogoutDialog();
+                break;
+            default:
+                $('.container-fluid').children().hide();
+                $target = $('.container-fluid').children('#' + data.targetTab);
+                $target.show();
         }
     }
     handleMenuClose();
@@ -677,7 +674,7 @@ function openNewGameDialog() {
                                                 })
                                             });
                                             var teams = calculateTeams(players);
-                                            players.sort(eloSort);
+                                            players.sort(nameSort);
 
                                             // Empty dropdown lists
                                             $('.modal-body [data-step="2"] select.form-control > option').remove();
@@ -1005,10 +1002,10 @@ function doLogin() {
             password: password
         },
         beforeSend: function () {
-            setLoaderIcon('home', true);
+            // TODO: set some kind of loader
         },
         complete: function (xhr, status) {
-            setLoaderIcon('home', false);
+            // TODO: remove loader
         },
         success: function (data, status, xhr) {
             token = data.token;
@@ -1021,23 +1018,117 @@ function doLogin() {
 }
 
 function loginMessage(message) {
-    clearTimeout(loginTextTimeout);
-    var $elem = $('#home button#login').siblings('p');
-    $elem.text(message);
-    loginTextTimeout = setTimeout(function () {
+    var $body = $('#password').closest('.modal-body');
+    var $elem = $('<p>', {
+        text: message
+    });
+    $body
+        .children('p')
+        .remove();
+    $body.append($elem);
+    setTimeout(function () {
         $elem.fadeOut(500, function () {
-            $elem
-                .text('')
-                .show();
+            $elem.remove();
         })
     }, 3000);
 }
 function loginSuccess() {
-    $('#password').val('');
-
-    $('[data-field="username"]').text($('#username').val());
     $('[data-logged-in="false"]').hide();
     $('[data-logged-in="true"]').show();
+
+    $('#password')
+        .closest('.modal')
+        .modal('hide');
+}
+
+function openLoginDialog() {
+    var dialog = $('<div>', {
+        'class': 'modal fade',
+        html: $('<div>', {
+            'class': 'modal-dialog',
+            html: $('<div>', {
+                'class': 'modal-content',
+                html: [
+                    $('<div>', {
+                        'class': 'modal-header',
+                        html: [
+                            $('<button>', {
+                                type: 'button',
+                                'class': 'close',
+                                'data-dismiss': 'modal',
+                                html: '&times;'
+                            }),
+                            $('<h4>', {
+                                'class': 'modal-title',
+                                text: 'Login'
+                            })
+                        ]
+                    }),
+                    $('<div>', {
+                        'class': 'modal-body',
+                        html: $('<div>', {
+                            'class': 'row',
+                            html: $('<div>', {
+                                'class': 'col-xs-12',
+                                html: $('<form>', {
+                                    html: $('<div>', {
+                                        'class': 'form-group',
+                                        html: [
+                                            $('<label>', {
+                                                'for': 'username',
+                                                text: 'Username'
+                                            }),
+                                            $('<input>', {
+                                                id: 'username',
+                                                'class': 'form-control',
+                                                type: 'text'
+                                            }),
+                                            $('<label>', {
+                                                'for': 'password',
+                                                text: 'Password'
+                                            }),
+                                            $('<input>', {
+                                                id: 'password',
+                                                'class': 'form-control',
+                                                type: 'password'
+                                            })
+                                        ]
+                                    })
+                                })
+                            })
+                        })
+                    }),
+                    $('<div>', {
+                        'class': 'modal-footer',
+                        html: [
+
+                            $('<button>', {
+                                type: 'button',
+                                'class': 'btn btn-primary float-right',
+                                text: 'Login',
+                                click: function () {
+                                    doLogin();
+                                }
+                            }),
+                            $('<button>', {
+                                type: 'button',
+                                'class': 'btn btn-danger float-right',
+                                'data-dismiss': 'modal',
+                                text: 'Cancel'
+                            })
+                        ]
+                    })
+                ]
+            })
+        })
+    });
+
+    $('body').append(dialog);
+    dialog.modal();
+
+    dialog.one('hidden.bs.modal', function () {
+        dialog.remove();
+    })
 }
 
 function openConfirmLogoutDialog() {
@@ -1106,7 +1197,6 @@ function logout() {
     token = null;
     $('[data-logged-in="true"]').hide();
     $('[data-logged-in="false"]').show();
-    $('[data-field="username"]').text('');
     $('.modal').modal('hide');
 }
 
