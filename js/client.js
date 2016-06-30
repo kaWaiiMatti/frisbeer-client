@@ -821,16 +821,28 @@ function openNewGameDialog() {
     });
 
     // add players to step 1 dropdowns
+    var players = [];
+
     $.each($('#players-table > tbody > tr'), function () {
+        players.push({
+            id: $(this).data('playerId'),
+            name: $(this).children().eq(0).text(),
+            elo: parseInt($(this).children().eq(1).text())
+        });
+    });
+
+    players.sort(nameSort);
+
+    for(var i = 0; i < players.length; i++) {
         dialog
             .find('[data-step="1"] select[data-form-key="player"]')
             .append($('<option>', {
-                'data-elo': $(this).children().eq(1).text(),
-                'data-name': $(this).children().eq(0).text(),
-                value: $(this).data('playerId'),
-                text: $(this).children().eq(0).text() + ' (' + $(this).children().eq(1).text() + ')'
+                'data-elo': players[i].elo,
+                'data-name': players[i].name,
+                value: players[i].id,
+                text: players[i].name + ' (' + players[i].elo + ')'
             }));
-    });
+    }
 
     // disabled selected players from other select elements
     dialog
@@ -1096,6 +1108,13 @@ function logout() {
     $('[data-logged-in="false"]').show();
     $('[data-field="username"]').text('');
     $('.modal').modal('hide');
+}
+
+// found at http://stackoverflow.com/a/6712080
+function nameSort(a, b) {
+    if(a.name.toLowerCase() < b.name.toLowerCase()) return -1;
+    if(a.name.toLowerCase() > b.name.toLowerCase()) return 1;
+    return 0;
 }
 
 function dateSort(a, b) {
