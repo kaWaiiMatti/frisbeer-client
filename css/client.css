@@ -17,6 +17,11 @@ html,
     padding-top: 15px;
 }
 
+/* RANK IMAGES */
+#players-table img {
+    max-height: 2.25em;
+}
+
 /* MODALS */
 select + select {
     margin-top: 10px;

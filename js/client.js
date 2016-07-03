@@ -1,6 +1,9 @@
 var token;
 var server = 'http://127.0.0.1:8000/';
 //var server = 'https://moetto.duckdns.org/frisbeer/';
+var ongoingGames = [];
+
+var imageNames = { 'Klipsu I': 'silver1.png', 'Klipsu II': 'silver2.png', 'Klipsu III': 'silver3.png', 'Klipsu IV': 'silver4.png', 'Klipsu Mestari': 'silver5.png', 'Klipsu Eliitti Mestari': 'silverem.png', 'Kultapossu I': 'gold1.png', 'Kultapossu II': 'gold2.png', 'Kultapossu III': 'gold3.png', 'Kultapossu Mestari': 'gold4.png', 'Mestari Heittäjä I': 'mg1.png', 'Mestari Heittäjä II': 'mg2.png', 'Mestari Heittäjä Eliitti': 'mge.png', 'Arvostettu Jallu Mestari': 'dmg.png', 'Legendaarinen Nalle': 'eagle.png', 'Legendaarinen Nalle Mestari': 'eagle2.png', 'Korkein Ykkösluokan Mestari': 'supreme.png', 'Urheileva Alkoholisti': 'global.png' };
 
 $(document).ready(function () {
     $('.container-fluid').children().hide();
@@ -22,6 +25,9 @@ $(document).ready(function () {
 
     updatePlayersList(function () {
         updateGamesList();
+        loadOngoingGamesFromCookies(function() {
+            updateOngoingGamesList();
+        });
     });
 
     $('[data-logged-in="true"]').hide();
@@ -96,7 +102,9 @@ function updatePlayersList(successCallback) {
                 'data-player-id': this.id,
                 html: [$('<td>', {
                     'data-content': 'rank',
-                    text: this.rank
+                    html: $('<img>', {
+                        src: this.rank !== undefined && this.rank.length > 0 ? 'img/ranks/' + imageNames[this.rank] : ''
+                    })
                 }),$('<td>', {
                     'data-content': 'name',
                     text: this.name
@@ -144,6 +152,10 @@ function getGames(successCallback, errorCallback) {
 
 
 function postNewGame(data, successCallback, errorCallback) {
+    if(token === undefined || token === null || token.length === 0) {
+        // TODO: SET ERROR MESSAGE
+        return;
+    }
     $.ajax({
         url: server + 'API/games/',
         method: 'POST',
@@ -159,8 +171,9 @@ function postNewGame(data, successCallback, errorCallback) {
             // TODO: do something
         },
         success: function (data, status, xhr) {
-            updateGamesList();
-            updatePlayersList();
+            updatePlayersList(function() {
+                updateGamesList();
+            });
             if ($.isFunction(successCallback)) {
                 successCallback(data);
             }
@@ -194,7 +207,6 @@ function updateGamesList(successCallback) {
         if ($.isFunction(successCallback)) {
             successCallback(data);
         }
-        ;
     });
 }
 
@@ -219,6 +231,83 @@ function getPlayerName(id) {
     });
 
     return name !== null ? name : 'id=' + id;
+}
+
+function getPlayerNames(idList, liItems) {
+    var names = [];
+
+    if(liItems === undefined || liItems === false) {
+        for(var i = 0; i < idList.length; i++) {
+            names.push(getPlayerName(idList[i]));
+        }
+        return names.join(', ');
+    }
+
+    for(var i = 0; i < idList.length; i++) {
+        names.push($('<li>', {
+            text: getPlayerName(idList[i])
+        }));
+    }
+
+    return names;
+}
+
+function loadOngoingGamesFromCookies(callback) {
+    var cookie = getCookie('ongoingGames');
+    if (cookie !== '') {
+        ongoingGames = JSON.parse(cookie);
+    }
+    if ($.isFunction(callback)) {
+        callback();
+    }
+}
+
+function storeOngoingGamesToCookies() {
+    setCookie('ongoingGames', JSON.stringify(ongoingGames), 365);
+}
+
+function updateOngoingGamesList() {
+    $('#ongoing-games-table tbody > tr').remove();
+
+    if (ongoingGames.length === 0) {
+        $('#ongoing-games-table').parent().hide();
+        return;
+    }
+
+    for (var i = 0; i < ongoingGames.length; i++) {
+        $('#ongoing-games-table tbody').append($('<tr>', {
+            html: [
+                $('<td>', {
+                    text: new Date(ongoingGames[i].date).toDateString()
+                }),
+                $('<td>', {
+                    text: getPlayerNames(ongoingGames[i].team1)
+                }),
+                $('<td>', {
+                    text: getPlayerNames(ongoingGames[i].team2)
+                }),
+                $('<td>', {
+                    html: $('<button>', {
+                        'class': 'btn btn-primary float-right',
+                        'data-game-id': ongoingGames[i].id,
+                        'data-logged-in': true,
+                        text: 'Enter result',
+                        click: function () {
+                            openEnterResultDialog($(this));
+                        }
+                    })
+                })
+            ]
+        }));
+    }
+
+    if(token === undefined || token === null) {
+        $('#ongoing-games-table')
+            .find('[data-logged-in="true"]')
+            .hide();
+    }
+
+    $('#ongoing-games-table').parent().show();
 }
 
 function handleMenuClick(e) {
@@ -403,7 +492,7 @@ function openNewPlayerDialog() {
 
     dialog.one('hidden.bs.modal', function () {
         dialog.remove();
-    })
+    });
 }
 
 function openNewGameDialog() {
@@ -433,11 +522,6 @@ function openNewGameDialog() {
                                 'class': 'modal-title',
                                 'data-step': 2,
                                 text: 'Create teams'
-                            }),
-                            $('<h4>', {
-                                'class': 'modal-title',
-                                'data-step': 3,
-                                text: 'Set result'
                             })
                         ]
                     }),
@@ -567,89 +651,6 @@ function openNewGameDialog() {
                                         ]
                                     })
                                 ]
-                            }),
-                            $('<div>', {
-                                'data-step': 3,
-                                html: [
-                                    $('<div>', {
-                                        'class': 'row',
-                                        html: [
-                                            $('<div>', { // TEAM 1
-                                                'class': 'col-xs-6',
-                                                html: [
-                                                    $('<p>', {text: 'Team 1'}),
-                                                    $('<ul>', {'data-field-name': 'team1'})
-                                                ]
-                                            }),
-                                            $('<div>', { // TEAM 2
-                                                'class': 'col-xs-6',
-                                                html: [
-                                                    $('<p>', {text: 'Team 2'}),
-                                                    $('<ul>', {'data-field-name': 'team2'})
-                                                ]
-                                            })
-                                        ]
-                                    }),
-                                    $('<div>', {
-                                        'class': 'row',
-                                        html: [
-                                            $('<div>', {
-                                                'class': 'col-xs-12',
-                                                html: $('<div>', {
-                                                    'class': 'btn-group btn-group-justified',
-                                                    'data-form-key': 'result',
-                                                    role: 'group',
-                                                    html: [
-                                                        $('<div>', {
-                                                            'class': 'btn-group',
-                                                            'role': 'group',
-                                                            html: $('<button>', {
-                                                                type: 'button',
-                                                                'class': 'btn btn-default',
-                                                                'data-team1-score': 2,
-                                                                'data-team2-score': 0,
-                                                                text: '2-0'
-                                                            })
-                                                        }),
-                                                        $('<div>', {
-                                                            'class': 'btn-group',
-                                                            'role': 'group',
-                                                            html: $('<button>', {
-                                                                type: 'button',
-                                                                'class': 'btn btn-default',
-                                                                'data-team1-score': 2,
-                                                                'data-team2-score': 1,
-                                                                text: '2-1'
-                                                            })
-                                                        }),
-                                                        $('<div>', {
-                                                            'class': 'btn-group',
-                                                            'role': 'group',
-                                                            html: $('<button>', {
-                                                                type: 'button',
-                                                                'class': 'btn btn-default',
-                                                                'data-team1-score': 1,
-                                                                'data-team2-score': 2,
-                                                                text: '1-2'
-                                                            })
-                                                        }),
-                                                        $('<div>', {
-                                                            'class': 'btn-group',
-                                                            'role': 'group',
-                                                            html: $('<button>', {
-                                                                type: 'button',
-                                                                'class': 'btn btn-default',
-                                                                'data-team1-score': 0,
-                                                                'data-team2-score': 2,
-                                                                text: '0-2'
-                                                            })
-                                                        })
-                                                    ]
-                                                })
-                                            })
-                                        ]
-                                    })
-                                ]
                             })
                         ]
                     }),
@@ -732,20 +733,25 @@ function openNewGameDialog() {
                                     $('<button>', {
                                         type: 'button',
                                         'class': 'btn btn-primary float-right',
-                                        text: 'Next',
+                                        text: 'Start game',
                                         click: function () {
+                                            var game = {
+                                                date: new Date(),
+                                                id: getNextGameId(),
+                                                team1: [],
+                                                team2: []
+                                            };
+
                                             $.each($('.modal-body [data-step="2"] .form-group'), function (index) {
-                                                var $list = $('.modal-body [data-step="3"]').find('ul[data-field-name="team' + (index + 1) + '"]');
-                                                $list.children().remove();
                                                 $.each($(this).children('select'), function () {
-                                                    $list.append($('<li>', {
-                                                        text: $(this).children(':selected').data('playerName'),
-                                                        'data-player-id': $(this).val()
-                                                    }));
+                                                    game['team' + (index + 1)].push(parseInt($(this).val()));
                                                 });
                                             });
-                                            $('.modal-body [data-step="3"] [data-form-key="result"] button').removeClass('btn-primary');
-                                            changeModalStep(3);
+
+                                            ongoingGames.push(game);
+                                            storeOngoingGamesToCookies();
+                                            updateOngoingGamesList();
+                                            $(this).closest('.modal').modal('hide');
                                         }
                                     }),
                                     $('<button>', {
@@ -754,63 +760,6 @@ function openNewGameDialog() {
                                         text: 'Back',
                                         click: function () {
                                             changeModalStep(1);
-                                        }
-                                    })
-                                ]
-                            }),
-                            $('<div>', {
-                                'data-step': 3,
-                                html: [
-                                    $('<button>', {
-                                        type: 'button',
-                                        'class': 'btn btn-primary float-right',
-                                        text: 'Save',
-                                        click: function () {
-                                            if($('.modal-body [data-step="3"] [data-form-key="result"] button.btn-primary').length === 0) {
-                                                var $errorMessage = $('<p>', {
-                                                    'class': 'error-text',
-                                                    text: 'No score selected!'
-                                                });
-                                                $('.modal-body [data-step="3"]').append($errorMessage);
-                                                setTimeout(function() {
-                                                    $errorMessage.fadeOut(400, function() {
-                                                        $errorMessage.remove();
-                                                    })
-                                                }, 3000);
-                                                return;
-                                            }
-
-                                            $scoreBtn = $('.modal-body [data-step="3"] [data-form-key="result"] button.btn-primary');
-
-                                            var data = {
-                                                team1: [],
-                                                team2: []
-                                            };
-
-                                            data['team1_score'] = $scoreBtn.data('team1Score');
-                                            data['team2_score'] = $scoreBtn.data('team2Score');
-
-                                            $.each($('.modal-body [data-step="3"] ul[data-field-name="team1"] li'), function() {
-                                                data['team1'].push($(this).data('playerId'));
-                                            });
-
-                                            $.each($('.modal-body [data-step="3"] ul[data-field-name="team2"] li'), function() {
-                                                data['team2'].push($(this).data('playerId'));
-                                            });
-
-                                            console.log(data);
-                                            postNewGame(data, function() {
-                                                $('#newGameModal').modal('hide');
-                                            });
-                                            // TODO: POST THE GAME TO SERVER, UPDATE GAMES LIST ON SUCCESS
-                                        }
-                                    }),
-                                    $('<button>', {
-                                        type: 'button',
-                                        'class': 'btn btn-danger float-right',
-                                        text: 'Back',
-                                        click: function () {
-                                            changeModalStep(2);
                                         }
                                     })
                                 ]
@@ -864,18 +813,6 @@ function openNewGameDialog() {
                 .prop('disabled', true);
         });
 
-    dialog
-        .find('.modal-body [data-step="3"] [data-form-key="result"] button')
-        .click(function() {
-            $(this)
-                .addClass('btn-primary')
-                .parent()
-                .siblings()
-                .children('button')
-                .removeClass('btn-primary');
-        });
-
-
     dialog.find('[data-step]').hide();
     dialog.find('[data-step="1"]').show();
 
@@ -884,7 +821,254 @@ function openNewGameDialog() {
 
     dialog.one('hidden.bs.modal', function () {
         dialog.remove();
-    })
+    });
+}
+
+function getNextGameId() {
+    var id = 0;
+    for(var i = 0; i < ongoingGames.length; i++) {
+        if(ongoingGames[i].id === id) {
+            id++;
+            i = 0;
+        }
+    }
+    return id;
+}
+
+function openEnterResultDialog($elem) {
+
+    var gameId = $elem.data('gameId');
+    var gameIndex = null;
+
+    for(var i = 0; i < ongoingGames.length; i++) {
+        if(parseInt(ongoingGames[i].id) === gameId) {
+            gameIndex = i;
+            break;
+        }
+    }
+
+    if(gameIndex === null) {
+        console.log('Unable to find game with given id from ongoing games!');
+        return;
+    }
+
+    var dialog = $('<div>', {
+        'class': 'modal fade',
+        html: $('<div>', {
+            'class': 'modal-dialog',
+            html: $('<div>', {
+                'class': 'modal-content',
+                html: [
+                    $('<div>', {
+                        'class': 'modal-header',
+                        html: [
+                            $('<button>', {
+                                type: 'button',
+                                'class': 'close',
+                                'data-dismiss': 'modal',
+                                html: '&times;'
+                            }),
+                            $('<h4>', {
+                                'class': 'modal-title',
+                                text: 'Enter result'
+                            })
+                        ]
+                    }),
+                    $('<div>', {
+                        'class': 'modal-body',
+                        html: $('<div>', {
+                            html: [
+                                $('<div>', {
+                                    'class': 'row',
+                                    html: [
+                                        $('<div>', { // TEAM 1
+                                            'class': 'col-xs-6',
+                                            html: [
+                                                $('<p>', {text: 'Team 1'}),
+                                                $('<ul>', {
+                                                    'data-field-name': 'team1',
+                                                    html: getPlayerNames(ongoingGames[gameIndex].team1, true)
+                                                })
+                                            ]
+                                        }),
+                                        $('<div>', { // TEAM 2
+                                            'class': 'col-xs-6',
+                                            html: [
+                                                $('<p>', {text: 'Team 2'}),
+                                                $('<ul>', {
+                                                    'data-field-name': 'team2',
+                                                    html: getPlayerNames(ongoingGames[gameIndex].team2, true)
+                                                })
+                                            ]
+                                        })
+                                    ]
+                                }),
+                                $('<div>', {
+                                    'class': 'row',
+                                    html: [
+                                        $('<div>', {
+                                            'class': 'col-xs-12',
+                                            html: $('<div>', {
+                                                'class': 'btn-group btn-group-justified',
+                                                'data-form-key': 'result',
+                                                role: 'group',
+                                                html: [
+                                                    $('<div>', {
+                                                        'class': 'btn-group',
+                                                        'role': 'group',
+                                                        html: $('<button>', {
+                                                            type: 'button',
+                                                            'class': 'btn btn-default',
+                                                            click: function() {
+                                                                changeActiveButton($(this));
+                                                            },
+                                                            'data-team1-score': 2,
+                                                            'data-team2-score': 0,
+                                                            text: '2-0'
+                                                        })
+                                                    }),
+                                                    $('<div>', {
+                                                        'class': 'btn-group',
+                                                        'role': 'group',
+                                                        html: $('<button>', {
+                                                            type: 'button',
+                                                            'class': 'btn btn-default',
+                                                            click: function() {
+                                                                changeActiveButton($(this));
+                                                            },
+                                                            'data-team1-score': 2,
+                                                            'data-team2-score': 1,
+                                                            text: '2-1'
+                                                        })
+                                                    }),
+                                                    $('<div>', {
+                                                        'class': 'btn-group',
+                                                        'role': 'group',
+                                                        html: $('<button>', {
+                                                            type: 'button',
+                                                            'class': 'btn btn-default',
+                                                            click: function() {
+                                                                changeActiveButton($(this));
+                                                            },
+                                                            'data-team1-score': 1,
+                                                            'data-team2-score': 2,
+                                                            text: '1-2'
+                                                        })
+                                                    }),
+                                                    $('<div>', {
+                                                        'class': 'btn-group',
+                                                        'role': 'group',
+                                                        html: $('<button>', {
+                                                            type: 'button',
+                                                            'class': 'btn btn-default',
+                                                            click: function() {
+                                                                changeActiveButton($(this));
+                                                            },
+                                                            'data-team1-score': 0,
+                                                            'data-team2-score': 2,
+                                                            text: '0-2'
+                                                        })
+                                                    })
+                                                ]
+                                            })
+                                        })
+                                    ]
+                                })
+                            ]
+                        })
+                    }),
+                    $('<div>', {
+                        'class': 'modal-footer',
+                        html: [
+
+                            $('<button>', {
+                                type: 'button',
+                                'class': 'btn btn-primary float-right',
+                                'data-game-id': gameId,
+                                'data-team1': ongoingGames[gameIndex].team1,
+                                'data-team2': ongoingGames[gameIndex].team2,
+                                text: 'Post result',
+                                click: function () {
+                                    var $result = $(this)
+                                        .closest('.modal')
+                                        .find('button.btn-primary[data-team1-score][data-team2-score]');
+                                    if($result.length === 0) {
+                                        enterResultMessage($(this).closest('.modal').find('.modal-body'), 'Select game result!');
+                                        return;
+                                    }
+
+                                    var gameId = $(this).data('gameId');
+                                    var game = ongoingGames.filter(function(game){return game.id === gameId});
+
+                                    var data = {
+                                        team1: $(this).data('team1').split(','),
+                                        team2: $(this).data('team2').split(','),
+                                        team1_score: $result.data('team1Score'),
+                                        team2_score: $result.data('team2Score')
+                                    };
+
+                                    if(game.length > 0) {
+                                        data['date'] = new Date(game[0].date).toISOString()
+                                    }
+
+                                    postNewGame(data, function() {
+                                        ongoingGames = ongoingGames.filter(function(game) {
+                                            return game.id !== gameId;
+                                        });
+                                        storeOngoingGamesToCookies();
+                                        updateOngoingGamesList();
+                                    });
+
+                                    $(this)
+                                        .closest('.modal')
+                                        .modal('hide');
+                                }
+                            }),
+                            $('<button>', {
+                                type: 'button',
+                                'class': 'btn btn-danger float-right',
+                                'data-dismiss': 'modal',
+                                text: 'Cancel'
+                            })
+                        ]
+                    })
+                ]
+            })
+        })
+    });
+
+    $('body').append(dialog);
+    dialog.modal();
+
+    dialog.one('hidden.bs.modal', function () {
+        dialog.remove();
+    });
+}
+
+function enterResultMessage($body, message) {
+    var $elem = $('<p>', {
+        'class': 'error-text',
+        text: message
+    });
+    $body
+        .children('p')
+        .remove();
+    $body.append($elem);
+    setTimeout(function () {
+        $elem.fadeOut(500, function () {
+            $elem.remove();
+        })
+    }, 3000);
+}
+
+function changeActiveButton($btn) {
+    $btn
+        .parent()
+        .siblings()
+        .children('button.btn-primary')
+        .removeClass('btn-primary');
+
+    $btn.addClass('btn-primary');
 }
 
 function calculateTeams(players) {
@@ -1227,3 +1411,26 @@ function eloSort(a, b) {
  });
 
  */
+
+// found at http://www.w3schools.com/js/js_cookies.asp
+function setCookie(cname, cvalue, exdays) {
+    var d = new Date();
+    d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+    var expires = "expires=" + d.toUTCString();
+    document.cookie = cname + "=" + cvalue + "; " + expires;
+}
+
+function getCookie(cname) {
+    var name = cname + "=";
+    var ca = document.cookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
+}
