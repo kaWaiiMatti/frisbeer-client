@@ -252,6 +252,14 @@ function getPlayerNames(idList, liItems) {
     return names;
 }
 
+function removeOngoingGame(gameId) {
+    ongoingGames = ongoingGames.filter(function(game) {
+        return game.id !== gameId;
+    });
+    storeOngoingGamesToCookies();
+    updateOngoingGamesList();
+}
+
 function loadOngoingGamesFromCookies(callback) {
     var cookie = getCookie('ongoingGames');
     if (cookie !== '') {
@@ -1012,11 +1020,7 @@ function openEnterResultDialog($elem) {
                                     }
 
                                     postNewGame(data, function() {
-                                        ongoingGames = ongoingGames.filter(function(game) {
-                                            return game.id !== gameId;
-                                        });
-                                        storeOngoingGamesToCookies();
-                                        updateOngoingGamesList();
+                                        removeOngoingGame(gameId);
                                     });
 
                                     $(this)
@@ -1029,6 +1033,21 @@ function openEnterResultDialog($elem) {
                                 'class': 'btn btn-danger float-right',
                                 'data-dismiss': 'modal',
                                 text: 'Cancel'
+                            }),
+                            $('<button>', {
+                                type: 'button',
+                                'class': 'btn btn-danger float-left',
+                                click: function() {
+                                    var gameId = $(this)
+                                        .siblings('[data-game-id]')
+                                        .data('gameId');
+                                    removeOngoingGame(gameId);
+                                    $(this)
+                                        .closest('.modal')
+                                        .modal('hide');
+
+                                },
+                                text: 'Cancel game'
                             })
                         ]
                     })
