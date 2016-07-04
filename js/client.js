@@ -103,7 +103,8 @@ function updatePlayersList(successCallback) {
                 html: [$('<td>', {
                     'data-content': 'rank',
                     html: $('<img>', {
-                        src: this.rank !== undefined && this.rank.length > 0 ? 'img/ranks/' + imageNames[this.rank] : ''
+                        src: this.rank !== undefined && this.rank.length > 0 ? 'img/ranks/' + imageNames[this.rank] : '',
+                        title: this.rank !== undefined && this.rank.length > 0 ? this.rank : ''
                     })
                 }),$('<td>', {
                     'data-content': 'name',
