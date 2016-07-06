@@ -17,6 +17,16 @@ html,
     padding-top: 15px;
 }
 
+/* TABLE SORTING ELEMENTS */
+table > thead > tr > th[data-sort-type] {
+    color: blue;
+}
+
+table > thead > tr > th[data-sort-type] > span.glyphicon {
+    padding-left: 3px;
+    top: 3px;
+}
+
 /* RANK IMAGES */
 #players-table img {
     max-height: 2.25em;

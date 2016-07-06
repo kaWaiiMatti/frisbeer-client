@@ -23,6 +23,10 @@ $(document).ready(function () {
 
     $('.side-menu > ul.menu-items').on('click', 'li > a', null, handleMenuClick);
 
+    $('#players-table > thead > tr > th[data-sort-type]').click(function() {
+        updateUrlParameters($(this));
+    });
+
     updatePlayersList(function () {
         updateGamesList();
         loadOngoingGamesFromCookies(function() {
@@ -38,6 +42,7 @@ $(document).ready(function () {
         $('[data-logged-in="true"]').hide();
     }
 
+    updateTableSortIcons();
 
     $('.side-menu > ul.menu-items > li > a').first().click();
 });
@@ -1437,6 +1442,52 @@ var sortFunctions = {
     }
 };
 
+function updateUrlParameters($elem) {
+    var prefix = '';
+    switch($elem.closest('table').attr('id')) {
+        case 'players-table':
+            prefix = 'p';
+            break;
+    }
+
+    var prevSort = getQueryVariable(prefix + 'sort');
+    var prevOrder = getQueryVariable(prefix + 'order');
+
+    var newSort = $elem.data('sortType');
+
+    var params = {};
+
+    if(newSort !== prevSort) {
+        params[prefix + 'sort'] = newSort;
+        params[prefix + 'order'] = 'asc';
+    } else if(newSort === prevSort) {
+        params[prefix + 'sort'] = prevSort;
+        if(prevOrder === false) {
+            params[prefix + 'order'] = 'asc';
+        } else {
+            params[prefix + 'order'] = prevOrder === 'asc'
+                ? 'desc'
+                : 'asc';
+        }
+    }
+
+    location.search = '?' + $.param(params);
+}
+
+function updateTableSortIcons() {
+    var psort = getQueryVariable('psort');
+
+    if (psort !== false) {
+        var porder = getQueryVariable('porder');
+
+        $('#players-table')
+            .find('thead > tr > th[data-sort-type="' + psort + '"]')
+            .append($('<span>', {
+                'class': 'glyphicon glyphicon-triangle-' + (porder === 'desc' ? 'bottom' : 'top')
+            }));
+    }
+
+}
 
 function sortPlayersData(data) {
     var sortBy = getQueryVariable('psort') !== false
