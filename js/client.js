@@ -30,7 +30,14 @@ $(document).ready(function () {
         });
     });
 
-    $('[data-logged-in="true"]').hide();
+    var auth_token = getCookie('token');
+    if (auth_token !== null && auth_token.length > 0) {
+        token = auth_token;
+        loginSuccess();
+    } else {
+        $('[data-logged-in="true"]').hide();
+    }
+
 
     $('.side-menu > ul.menu-items > li > a').first().click();
 });
@@ -1218,6 +1225,7 @@ function doLogin() {
         },
         success: function (data, status, xhr) {
             token = data.token;
+            setCookie('token', token, 1);
             loginSuccess();
         },
         error: function (xhr, status, error) {
@@ -1404,6 +1412,7 @@ function openConfirmLogoutDialog() {
 
 function logout() {
     token = null;
+    setCookie('token', '');
     $('[data-logged-in="true"]').hide();
     $('[data-logged-in="false"]').show();
     $('.modal').modal('hide');
