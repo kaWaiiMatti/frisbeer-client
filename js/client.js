@@ -53,7 +53,7 @@ function getPlayers(successCallback, errorCallback) {
             setLoaderIcon('players', false);
         },
         success: function (data, status, xhr) {
-            data.sort(eloSort);
+            sortPlayersData(data);
             if ($.isFunction(successCallback)) {
                 successCallback(data);
             }
@@ -1425,12 +1425,50 @@ function nameSort(a, b) {
     return 0;
 }
 
-function dateSort(a, b) {
-    return b.elo - a.elo;
+var sortFunctions = {
+    elo: function (a, b) {
+        return a.elo - b.elo;
+    },
+    name: function (a, b) {
+        if (a.name.toLowerCase() < b.name.toLowerCase()) return -1;
+        if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
+        return 0;
+
+    }
+};
+
+
+function sortPlayersData(data) {
+    var sortBy = getQueryVariable('psort') !== false
+        ? getQueryVariable('psort')
+        : 'elo';
+
+    var order = getQueryVariable('porder') !== false
+        ? getQueryVariable('porder')
+        : sortBy === 'elo'
+            ? 'desc'
+            : 'asc';
+
+    data.sort(sortFunctions[sortBy]);
+
+    if(order === 'desc') {
+        data.reverse();
+    }
+
+    return data;
 }
 
-function eloSort(a, b) {
-    return b.elo - a.elo;
+// found at https://css-tricks.com/snippets/javascript/get-url-variables/
+function getQueryVariable(variable) {
+    var query = window.location.search.substring(1);
+    var vars = query.split("&");
+    for (var i = 0; i < vars.length; i++) {
+        var pair = vars[i].split("=");
+        if (pair[0] == variable) {
+            return pair[1];
+        }
+    }
+    return (false);
 }
 
 /*
