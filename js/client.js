@@ -382,6 +382,7 @@ function handleMenuClick(e) {
             default:
                 $('.container-fluid').children().hide();
                 $target = $('.container-fluid').children('#' + data.targetTab);
+                changeUrl({tab: data.targetTab});
                 $target.show();
         }
     }
