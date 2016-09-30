@@ -47,6 +47,44 @@ $(document).ready(function () {
     $('.side-menu > ul.menu-items > li > a').first().click();
 });
 
+function changeUrl(paramUpdate) {
+    if (typeof (history.pushState) != "undefined") {
+
+        var pageName = location.pathname.substr(location.pathname.lastIndexOf('/') + 1);
+        var updatedSearch = getSearchParameters(paramUpdate);
+
+        var obj = {
+            search: updatedSearch,
+            page: pageName,
+            url: pageName + '?' + updatedSearch
+        };
+        history.pushState(obj, obj.page, obj.url);
+    } else {
+        return;
+    }
+}
+
+function getSearchParameters(paramUpdate) {
+    var params = {};
+
+    if(location.search.length > 0) {
+        $.each(location.search.substr(1).split('&'), function() {
+            var temp = this.split('=');
+            params[temp[0]] = temp[1];
+        });
+    }
+
+    if(paramUpdate != null) {
+        $.each(paramUpdate, function(key, value) {
+            params[key] = value;
+        });
+    }
+
+    return $.map(params, function (value, key) {
+        return key + '=' + value;
+    }).join('&');
+}
+
 function getPlayers(successCallback, errorCallback) {
     $.ajax({
         url: server + 'API/players/',
