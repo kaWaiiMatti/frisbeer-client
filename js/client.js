@@ -44,7 +44,13 @@ $(document).ready(function () {
 
     updateTableSortIcons();
 
-    $('.side-menu > ul.menu-items > li > a').first().click();
+    var params = getSearchParameters();
+
+    if(params['tab'] !== undefined && $('.side-menu > ul.menu-items > li').find('a[data-target-tab="' + params['tab'] + '"]').length > 0) {
+        $('.side-menu > ul.menu-items > li').find('a[data-target-tab="' + params['tab'] + '"]').click();
+    } else {
+        $('.side-menu > ul.menu-items > li > a').first().click();
+    }
 });
 
 function changeUrl(paramUpdate) {
