@@ -51,7 +51,7 @@ function changeUrl(paramUpdate) {
     if (typeof (history.pushState) != "undefined") {
 
         var pageName = location.pathname.substr(location.pathname.lastIndexOf('/') + 1);
-        var updatedSearch = getSearchParameters(paramUpdate);
+        var updatedSearch = getSearchParameters(paramUpdate, true);
 
         var obj = {
             search: updatedSearch,
@@ -64,8 +64,9 @@ function changeUrl(paramUpdate) {
     }
 }
 
-function getSearchParameters(paramUpdate) {
+function getSearchParameters(paramUpdate, stringify) {
     var params = {};
+    stringify = stringify || false;
 
     if(location.search.length > 0) {
         $.each(location.search.substr(1).split('&'), function() {
@@ -80,9 +81,11 @@ function getSearchParameters(paramUpdate) {
         });
     }
 
-    return $.map(params, function (value, key) {
-        return key + '=' + value;
-    }).join('&');
+    return stringify
+        ? $.map(params, function (value, key) {
+            return key + '=' + value;
+        }).join('&')
+        : params;
 }
 
 function getPlayers(successCallback, errorCallback) {
