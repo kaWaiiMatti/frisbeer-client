@@ -212,8 +212,8 @@ function updatePlayersList() {
             html: [
                 $('<td>', {
                     html: $('<img>', {
-                        src: this.rank !== undefined && this.rank.length > 0 ? 'img/ranks/' + imageNames[this.rank] : '',
-                        title: this.rank !== undefined && this.rank.length > 0 ? this.rank : ''
+                        src: this.rank !== null ? this.rank.image_url : '',
+                        title: this.rank !== null ? this.rank.name : ''
                     })
                 }), $('<td>', {
                     text: this.name
@@ -288,6 +288,18 @@ function updateGameData(successCallback, errorCallback) {
     });
 }
 
+function getTeamPlayerNames(game, team) {
+    var players = [];
+    for(var i = 0; i < game.players.length; i++) {
+        var player = game.players[i];
+        if(player.team == team) {
+            players.push(player.name);
+        }
+    }
+
+    return players.join(', ');
+}
+
 function updateGamesList() {
     $('#games-table > tbody')
         .children('tr')
@@ -300,9 +312,9 @@ function updateGamesList() {
             html: [$('<td>', {
                 text: new Date(this.date).toDateString()
             }), $('<td>', {
-                text: getPlayerName(this.team1[0]) + ', ' + getPlayerName(this.team1[1]) + ', ' + getPlayerName(this.team1[2])
+                text: getTeamPlayerNames(this, 1)
             }), $('<td>', {
-                text: getPlayerName(this.team2[0]) + ', ' + getPlayerName(this.team2[1]) + ', ' + getPlayerName(this.team2[2])
+                text: getTeamPlayerNames(this, 2)
             }), $('<td>', {
                 text: this.team1_score + '-' + this.team2_score
             })]
