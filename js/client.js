@@ -1330,7 +1330,16 @@ function openLoginDialog() {
                                             $('<input>', {
                                                 id: 'password',
                                                 'class': 'form-control',
-                                                type: 'password'
+                                                type: 'password',
+                                                keyup: function (e) {
+                                                    if (e.keyCode === 13) {
+                                                        $(this)
+                                                            .closest('.modal')
+                                                            .find('.modal-footer')
+                                                            .find('button[data-do-login="true"]')
+                                                            .click();
+                                                    }
+                                                }
                                             })
                                         ]
                                     })
@@ -1345,6 +1354,7 @@ function openLoginDialog() {
                             $('<button>', {
                                 type: 'button',
                                 'class': 'btn btn-primary float-right',
+                                'data-do-login': 'true',
                                 text: 'Login',
                                 click: function () {
                                     doLogin();
