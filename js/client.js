@@ -3,7 +3,29 @@ var server = 'http://127.0.0.1:8000/';
 //var server = 'https://moetto.duckdns.org/frisbeer/';
 var ongoingGames = [];
 
-var imageNames = { 'Klipsu I': 'silver1.png', 'Klipsu II': 'silver2.png', 'Klipsu III': 'silver3.png', 'Klipsu IV': 'silver4.png', 'Klipsu Mestari': 'silver5.png', 'Klipsu Eliitti Mestari': 'silverem.png', 'Kultapossu I': 'gold1.png', 'Kultapossu II': 'gold2.png', 'Kultapossu III': 'gold3.png', 'Kultapossu Mestari': 'gold4.png', 'Mestari Heittäjä I': 'mg1.png', 'Mestari Heittäjä II': 'mg2.png', 'Mestari Heittäjä Eliitti': 'mge.png', 'Arvostettu Jallu Mestari': 'dmg.png', 'Legendaarinen Nalle': 'eagle.png', 'Legendaarinen Nalle Mestari': 'eagle2.png', 'Korkein Ykkösluokan Mestari': 'supreme.png', 'Urheileva Alkoholisti': 'global.png' };
+var playerObject = {};
+var gameList = [];
+
+var imageNames = {
+    'Klipsu I': 'silver1.png',
+    'Klipsu II': 'silver2.png',
+    'Klipsu III': 'silver3.png',
+    'Klipsu IV': 'silver4.png',
+    'Klipsu Mestari': 'silver5.png',
+    'Klipsu Eliitti Mestari': 'silverem.png',
+    'Kultapossu I': 'gold1.png',
+    'Kultapossu II': 'gold2.png',
+    'Kultapossu III': 'gold3.png',
+    'Kultapossu Mestari': 'gold4.png',
+    'Mestari Heittäjä I': 'mg1.png',
+    'Mestari Heittäjä II': 'mg2.png',
+    'Mestari Heittäjä Eliitti': 'mge.png',
+    'Arvostettu Jallu Mestari': 'dmg.png',
+    'Legendaarinen Nalle': 'eagle.png',
+    'Legendaarinen Nalle Mestari': 'eagle2.png',
+    'Korkein Ykkösluokan Mestari': 'supreme.png',
+    'Urheileva Alkoholisti': 'global.png'
+};
 
 $(document).ready(function () {
     $('.container-fluid').children().hide();
@@ -13,25 +35,41 @@ $(document).ready(function () {
     $('[data-close-menu="true"]').click(handleMenuClose);
 
     $('#add-new-player').click(openNewPlayerDialog);
-    $('#refresh-players').click(updatePlayersList);
+    $('#refresh-players').click(function () {
+        updatePlayerData(function () {
+            updatePlayersList();
+        })
+    });
 
     $('#add-new-game').click(openNewGameDialog);
-    $('#refresh-games').click(updateGamesList);
+    $('#refresh-games').click(function () {
+        updateGameData(function () {
+            updateGamesList();
+        })
+    });
 
     $('#login').click(doLogin);
     $('#logout').click(openConfirmLogoutDialog);
 
     $('.side-menu > ul.menu-items').on('click', 'li > a', null, handleMenuClick);
 
-    $('#players-table > thead > tr > th[data-sort-type]').click(function() {
+    $('#players-table > thead > tr > th[data-sort-type]').click(function () {
         updateUrlParameters($(this));
+    });
+
+    updatePlayerData(function () {
+        updatePlayersList();
+        updateGameData(function () {
+            updateGamesList();
+            loadOngoingGamesFromCookies(function () {
+                updateOngoingGamesList();
+            });
+        });
     });
 
     updatePlayersList(function () {
         updateGamesList();
-        loadOngoingGamesFromCookies(function() {
-            updateOngoingGamesList();
-        });
+
     });
 
     var auth_token = getCookie('token');
@@ -46,7 +84,7 @@ $(document).ready(function () {
 
     var params = getSearchParameters();
 
-    if(params['tab'] !== undefined && $('.side-menu > ul.menu-items > li').find('a[data-target-tab="' + params['tab'] + '"]').length > 0) {
+    if (params['tab'] !== undefined && $('.side-menu > ul.menu-items > li').find('a[data-target-tab="' + params['tab'] + '"]').length > 0) {
         $('.side-menu > ul.menu-items > li').find('a[data-target-tab="' + params['tab'] + '"]').click();
     } else {
         $('.side-menu > ul.menu-items > li > a').first().click();
@@ -74,15 +112,15 @@ function getSearchParameters(paramUpdate, stringify) {
     var params = {};
     stringify = stringify || false;
 
-    if(location.search.length > 0) {
-        $.each(location.search.substr(1).split('&'), function() {
+    if (location.search.length > 0) {
+        $.each(location.search.substr(1).split('&'), function () {
             var temp = this.split('=');
             params[temp[0]] = temp[1];
         });
     }
 
-    if(paramUpdate != null) {
-        $.each(paramUpdate, function(key, value) {
+    if (paramUpdate != null) {
+        $.each(paramUpdate, function (key, value) {
             params[key] = value;
         });
     }
@@ -92,30 +130,6 @@ function getSearchParameters(paramUpdate, stringify) {
             return key + '=' + value;
         }).join('&')
         : params;
-}
-
-function getPlayers(successCallback, errorCallback) {
-    $.ajax({
-        url: server + 'API/players/',
-        method: 'GET',
-        beforeSend: function () {
-            setLoaderIcon('players', true);
-        },
-        complete: function (xhr, status) {
-            setLoaderIcon('players', false);
-        },
-        success: function (data, status, xhr) {
-            sortPlayersData(data);
-            if ($.isFunction(successCallback)) {
-                successCallback(data);
-            }
-        },
-        error: function (xhr, status, error) {
-            if ($.isFunction(errorCallback)) {
-                errorCallback(xhr, status, error);
-            }
-        }
-    });
 }
 
 function postNewPlayer(param, successCallback, errorCallback) {
@@ -138,7 +152,7 @@ function postNewPlayer(param, successCallback, errorCallback) {
         complete: function (xhr, status) {
             // TODO: do something
         },
-        success: function (data, status, xhr) {
+        success: function (data) {
             updatePlayersList();
             if ($.isFunction(successCallback)) {
                 successCallback(data);
@@ -153,51 +167,21 @@ function postNewPlayer(param, successCallback, errorCallback) {
     })
 }
 
-function updatePlayersList(successCallback) {
-    clearPlayersList();
-    getPlayers(function (data) {
-        $.each(data, function () {
-            $('#players-table > tbody').append($('<tr>', {
-                'data-player-id': this.id,
-                html: [$('<td>', {
-                    'data-content': 'rank',
-                    html: $('<img>', {
-                        src: this.rank !== undefined && this.rank.length > 0 ? 'img/ranks/' + imageNames[this.rank] : '',
-                        title: this.rank !== undefined && this.rank.length > 0 ? this.rank : ''
-                    })
-                }),$('<td>', {
-                    'data-content': 'name',
-                    text: this.name
-                }), $('<td>', {
-                    'data-content': 'elo',
-                    text: this.elo
-                })]
-            }))
-        });
-        if ($.isFunction(successCallback)) {
-            successCallback(data);
-        }
-    });
-}
-
-function clearPlayersList() {
-    $('#players-table > tbody')
-        .children('tr')
-        .remove();
-}
-
-function getGames(successCallback, errorCallback) {
+function updatePlayerData(successCallback, errorCallback) {
     $.ajax({
-        url: server + 'API/games/',
+        url: server + 'API/players/',
         method: 'GET',
         beforeSend: function () {
-            setLoaderIcon('games', true);
+            setLoaderIcon('players', true);
         },
-        complete: function (xhr, status) {
-            setLoaderIcon('games', false);
+        complete: function () {
+            setLoaderIcon('players', false);
         },
-        success: function (data, status, xhr) {
-            //data.sort(dateSort);
+        success: function (data) {
+            playerObject = {};
+            for (var i = 0; i < data.length; i++) {
+                playerObject[data[i].id] = data[i];
+            }
             if ($.isFunction(successCallback)) {
                 successCallback(data);
             }
@@ -210,9 +194,38 @@ function getGames(successCallback, errorCallback) {
     });
 }
 
+function getPlayerList() {
+    return $.map(playerObject, function (player) {
+        return player
+    });
+}
+
+function updatePlayersList() {
+    $('#players-table > tbody')
+        .children('tr')
+        .remove();
+
+    // TODO: copy game data to temp variable, perform sorting and present data
+
+    $.each(getPlayerList(), function () {
+        $('#players-table > tbody').append($('<tr>', {
+            html: [
+                $('<td>', {
+                    html: $('<img>', {
+                        src: this.rank !== undefined && this.rank.length > 0 ? 'img/ranks/' + imageNames[this.rank] : '',
+                        title: this.rank !== undefined && this.rank.length > 0 ? this.rank : ''
+                    })
+                }), $('<td>', {
+                    text: this.name
+                }), $('<td>', {
+                    text: this.score
+                })]
+        }))
+    });
+}
 
 function postNewGame(data, successCallback, errorCallback) {
-    if(token === undefined || token === null || token.length === 0) {
+    if (token === undefined || token === null || token.length === 0) {
         // TODO: SET ERROR MESSAGE
         return;
     }
@@ -230,10 +243,14 @@ function postNewGame(data, successCallback, errorCallback) {
         complete: function (xhr, status) {
             // TODO: do something
         },
-        success: function (data, status, xhr) {
-            updatePlayersList(function() {
-                updateGamesList();
+        success: function (data) {
+            updatePlayerData(function () {
+                updatePlayersList();
+                updateGameData(function () {
+                    updateGamesList();
+                });
             });
+
             if ($.isFunction(successCallback)) {
                 successCallback(data);
             }
@@ -247,63 +264,73 @@ function postNewGame(data, successCallback, errorCallback) {
     })
 }
 
-function updateGamesList(successCallback) {
-    clearGamesList();
-    getGames(function (data) {
-        $.each(data, function () {
-            $('#games-table > tbody').append($('<tr>', {
-                'data-game-id': this.id,
-                html: [$('<td>', {
-                    text: new Date(this.date).toDateString()
-                }), $('<td>', {
-                    text: getPlayerName(this.team1[0]) + ', ' + getPlayerName(this.team1[1]) + ', ' + getPlayerName(this.team1[2])
-                }), $('<td>', {
-                    text: getPlayerName(this.team2[0]) + ', ' + getPlayerName(this.team2[1]) + ', ' + getPlayerName(this.team2[2])
-                }), $('<td>', {
-                    text: this.team1_score + '-' + this.team2_score
-                })]
-            }))
-        });
-        if ($.isFunction(successCallback)) {
-            successCallback(data);
+function updateGameData(successCallback, errorCallback) {
+    $.ajax({
+        url: server + 'API/games/',
+        method: 'GET',
+        beforeSend: function () {
+            setLoaderIcon('games', true);
+        },
+        complete: function () {
+            setLoaderIcon('games', false);
+        },
+        success: function (data) {
+            gameList = data;
+            if ($.isFunction(successCallback)) {
+                successCallback(data);
+            }
+        },
+        error: function (xhr, status, error) {
+            if ($.isFunction(errorCallback)) {
+                errorCallback(xhr, status, error);
+            }
         }
     });
 }
 
-function clearGamesList() {
+function updateGamesList() {
     $('#games-table > tbody')
         .children('tr')
         .remove();
+
+    // TODO: copy game data to temp variable, perform sorting and present data
+
+    $.each(gameList, function () {
+        $('#games-table > tbody').append($('<tr>', {
+            html: [$('<td>', {
+                text: new Date(this.date).toDateString()
+            }), $('<td>', {
+                text: getPlayerName(this.team1[0]) + ', ' + getPlayerName(this.team1[1]) + ', ' + getPlayerName(this.team1[2])
+            }), $('<td>', {
+                text: getPlayerName(this.team2[0]) + ', ' + getPlayerName(this.team2[1]) + ', ' + getPlayerName(this.team2[2])
+            }), $('<td>', {
+                text: this.team1_score + '-' + this.team2_score
+            })]
+        }));
+    });
 }
 
 function getPlayerName(id) {
-    var name = null;
+    var player = playerObject[id];
 
-    if (id === undefined || id === null) {
-        return 'unnamed';
+    if(player === undefined) {
+        return 'id=' + id;
     }
 
-    $.each($('#players-table > tbody > tr'), function () {
-        if ($(this).data('playerId') === id) {
-            name = $(this).children('[data-content="name"]').text();
-            return false;
-        }
-    });
-
-    return name !== null ? name : 'id=' + id;
+    return  player.name;
 }
 
 function getPlayerNames(idList, liItems) {
     var names = [];
 
-    if(liItems === undefined || liItems === false) {
-        for(var i = 0; i < idList.length; i++) {
+    if (liItems === undefined) {
+        for (var i = 0; i < idList.length; i++) {
             names.push(getPlayerName(idList[i]));
         }
         return names.join(', ');
     }
 
-    for(var i = 0; i < idList.length; i++) {
+    for (var i = 0; i < idList.length; i++) {
         names.push($('<li>', {
             text: getPlayerName(idList[i])
         }));
@@ -313,7 +340,7 @@ function getPlayerNames(idList, liItems) {
 }
 
 function removeOngoingGame(gameId) {
-    ongoingGames = ongoingGames.filter(function(game) {
+    ongoingGames = ongoingGames.filter(function (game) {
         return game.id !== gameId;
     });
     storeOngoingGamesToCookies();
@@ -369,7 +396,7 @@ function updateOngoingGamesList() {
         }));
     }
 
-    if(token === undefined || token === null) {
+    if (token === undefined || token === null) {
         $('#ongoing-games-table')
             .find('[data-logged-in="true"]')
             .hide();
@@ -379,9 +406,9 @@ function updateOngoingGamesList() {
 }
 
 function handleMenuClick(e) {
-    var data = $(e.target).data();
-    if (data.targetTab !== undefined && data.targetTab !== null) {
-        switch(data.targetTab) {
+    var targetTab = $(e.target).data('targetTab');
+    if (targetTab !== undefined && targetTab !== null) {
+        switch (targetTab) {
             case 'login':
                 openLoginDialog();
                 break;
@@ -390,8 +417,8 @@ function handleMenuClick(e) {
                 break;
             default:
                 $('.container-fluid').children().hide();
-                $target = $('.container-fluid').children('#' + data.targetTab);
-                changeUrl({tab: data.targetTab});
+                var $target = $('.container-fluid').children('#' + targetTab);
+                changeUrl({tab: targetTab});
                 $target.show();
         }
     }
@@ -410,7 +437,7 @@ function setLoaderIcon(tab, visible) {
         ? visible
         : true;
 
-    $parent = $('.container-fluid > ' + tab);
+    var $parent = $('.container-fluid > ' + tab);
 
     if (visible) {
         if ($parent.children('.loader-icon').length > 0) {
@@ -670,7 +697,7 @@ function openNewGameDialog() {
                                                         $('<p>', {
                                                             html: [
                                                                 $('<span>', {
-                                                                    text: 'Team average: '
+                                                                    text: 'Team score average: '
 
                                                                 }),
                                                                 $('<span>', {
@@ -705,7 +732,7 @@ function openNewGameDialog() {
                                                         $('<p>', {
                                                             html: [
                                                                 $('<span>', {
-                                                                    text: 'Team average: '
+                                                                    text: 'Team score average: '
 
                                                                 }),
                                                                 $('<span>', {
@@ -734,43 +761,45 @@ function openNewGameDialog() {
                                         'class': 'btn btn-primary float-right',
                                         text: 'Next',
                                         click: function () {
-                                            if ($('.modal-body [data-step="1"] select[data-form-key="player"]').children(':selected').length < 6) {
+                                            // Liian vähän pelaajia valittuna
+                                            var selectedPlayers = $('.modal-body [data-step="1"] select[data-form-key="player"]').children(':selected');
+                                            if (selectedPlayers.length < 6) {
                                                 // TODO: SET ERROR TEXT WITH TIMEOUT
                                                 console.log('not all selected');
                                                 return;
                                             }
 
-                                            var players = [];
-                                            $.each($('.modal-body [data-step="1"] select[data-form-key="player"]').children(':selected'), function () {
-                                                players.push({
-                                                    name: $(this).data('name'),
-                                                    elo: $(this).data('elo'),
-                                                    id: $(this).val()
+                                            // Kerää pelaajien ID:t ja muodosta joukkueet
+                                            // TODO: TEST IF THIS WORKS
+                                            var players = selectedPlayers
+                                                .map(function () {
+                                                    return parseInt($(this).val());
                                                 })
-                                            });
-                                            var teams = calculateTeams(players);
-                                            players.sort(nameSort);
+                                                .get();
 
-                                            // Empty dropdown lists
+                                            var teams = calculateTeams(players);
+
+                                            // Lisää step2 valintoihin kaikki pelin pelaajat ja alustaa valinnat joukkueiden perusteella
                                             $('.modal-body [data-step="2"] select.form-control > option').remove();
 
                                             for (var i = 0; i < players.length; i++) { // TODO: DOES NOT WORK?
                                                 $('.modal-body [data-step="2"] .form-control').append($('<option>', {
-                                                    value: players[i].id,
-                                                    'data-player-elo': players[i].elo,
-                                                    'data-player-name': players[i].name,
-                                                    text: players[i].name + ' (' + players[i].elo + ')'
+                                                    value: players[i],
+                                                    text: playerObject[players[i]].name + ' (' + playerObject[players[i]].score + ')'
                                                 }));
                                             }
 
                                             $.each($('.modal-body [data-step="2"] .form-group'), function (teamIndex) {
                                                 $.each($(this).children('select'), function (playerIndex) {
-                                                    $(this).val(teams[teamIndex][playerIndex].id);
+                                                    $(this).val(teams['team' + (teamIndex + 1)][playerIndex]);
                                                     $(this).data('prev', $(this).val());
                                                 });
                                             });
-                                            updateEloAverages();
 
+                                            // Päivittää score keskiarvot joukkueille
+                                            updateScoreAverages();
+
+                                            // Jos pelaaja vaihdetaan manuaalisesti päivitetään muut niin, että jokainen pelaaja on vain kerran
                                             $('.modal-body [data-step="2"] select.form-control').change(function () {
                                                 var newId = $(this).val();
                                                 var prev = $(this).data('prev');
@@ -782,7 +811,7 @@ function openNewGameDialog() {
                                                     }
                                                 });
                                                 $(this).data('prev', newId);
-                                                updateEloAverages();
+                                                updateScoreAverages();
                                             });
 
                                             changeModalStep(2);
@@ -841,26 +870,16 @@ function openNewGameDialog() {
     });
 
     // add players to step 1 dropdowns
-    var players = [];
-
-    $.each($('#players-table > tbody > tr'), function () {
-        players.push({
-            id: $(this).data('playerId'),
-            name: $(this).children('[data-content="name"]').text(),
-            elo: parseInt($(this).children('[data-content="elo"]').text())
-        });
-    });
+    var players = getPlayerList().slice();
 
     players.sort(nameSort);
 
-    for(var i = 0; i < players.length; i++) {
+    for (var i = 0; i < players.length; i++) {
         dialog
             .find('[data-step="1"] select[data-form-key="player"]')
             .append($('<option>', {
-                'data-elo': players[i].elo,
-                'data-name': players[i].name,
                 value: players[i].id,
-                text: players[i].name + ' (' + players[i].elo + ')'
+                text: players[i].name + ' (' + players[i].score + ')'
             }));
     }
 
@@ -895,8 +914,8 @@ function openNewGameDialog() {
 
 function getNextGameId() {
     var id = 0;
-    for(var i = 0; i < ongoingGames.length; i++) {
-        if(ongoingGames[i].id === id) {
+    for (var i = 0; i < ongoingGames.length; i++) {
+        if (ongoingGames[i].id === id) {
             id++;
             i = 0;
         }
@@ -909,14 +928,14 @@ function openEnterResultDialog($elem) {
     var gameId = $elem.data('gameId');
     var gameIndex = null;
 
-    for(var i = 0; i < ongoingGames.length; i++) {
-        if(parseInt(ongoingGames[i].id) === gameId) {
+    for (var i = 0; i < ongoingGames.length; i++) {
+        if (parseInt(ongoingGames[i].id) === gameId) {
             gameIndex = i;
             break;
         }
     }
 
-    if(gameIndex === null) {
+    if (gameIndex === null) {
         console.log('Unable to find game with given id from ongoing games!');
         return;
     }
@@ -988,7 +1007,7 @@ function openEnterResultDialog($elem) {
                                                         html: $('<button>', {
                                                             type: 'button',
                                                             'class': 'btn btn-default',
-                                                            click: function() {
+                                                            click: function () {
                                                                 changeActiveButton($(this));
                                                             },
                                                             'data-team1-score': 2,
@@ -1002,7 +1021,7 @@ function openEnterResultDialog($elem) {
                                                         html: $('<button>', {
                                                             type: 'button',
                                                             'class': 'btn btn-default',
-                                                            click: function() {
+                                                            click: function () {
                                                                 changeActiveButton($(this));
                                                             },
                                                             'data-team1-score': 2,
@@ -1016,7 +1035,7 @@ function openEnterResultDialog($elem) {
                                                         html: $('<button>', {
                                                             type: 'button',
                                                             'class': 'btn btn-default',
-                                                            click: function() {
+                                                            click: function () {
                                                                 changeActiveButton($(this));
                                                             },
                                                             'data-team1-score': 1,
@@ -1030,7 +1049,7 @@ function openEnterResultDialog($elem) {
                                                         html: $('<button>', {
                                                             type: 'button',
                                                             'class': 'btn btn-default',
-                                                            click: function() {
+                                                            click: function () {
                                                                 changeActiveButton($(this));
                                                             },
                                                             'data-team1-score': 0,
@@ -1061,13 +1080,15 @@ function openEnterResultDialog($elem) {
                                     var $result = $(this)
                                         .closest('.modal')
                                         .find('button.btn-primary[data-team1-score][data-team2-score]');
-                                    if($result.length === 0) {
+                                    if ($result.length === 0) {
                                         enterResultMessage($(this).closest('.modal').find('.modal-body'), 'Select game result!');
                                         return;
                                     }
 
                                     var gameId = $(this).data('gameId');
-                                    var game = ongoingGames.filter(function(game){return game.id === gameId});
+                                    var game = ongoingGames.filter(function (game) {
+                                        return game.id === gameId
+                                    });
 
                                     var data = {
                                         team1: $(this).data('team1').split(','),
@@ -1076,11 +1097,11 @@ function openEnterResultDialog($elem) {
                                         team2_score: $result.data('team2Score')
                                     };
 
-                                    if(game.length > 0) {
+                                    if (game.length > 0) {
                                         data['date'] = new Date(game[0].date).toISOString()
                                     }
 
-                                    postNewGame(data, function() {
+                                    postNewGame(data, function () {
                                         removeOngoingGame(gameId);
                                     });
 
@@ -1098,7 +1119,7 @@ function openEnterResultDialog($elem) {
                             $('<button>', {
                                 type: 'button',
                                 'class': 'btn btn-danger float-left',
-                                click: function() {
+                                click: function () {
                                     var gameId = $(this)
                                         .siblings('[data-game-id]')
                                         .data('gameId');
@@ -1152,76 +1173,12 @@ function changeActiveButton($btn) {
 }
 
 function calculateTeams(players) {
-    var best = {
-        difference: null,
-        team1: []
+    // TODO: GET FROM API ONCE AVAILABLE
+
+    return {
+        team1: [players[0], players[1], players[2]],
+        team2: [players[3], players[4], players[5]]
     };
-
-    for (var i = 1; i < players.length; i++) {
-        for (var j = i + 1; j < players.length; j++) {
-            var team1 = [];
-            team1.push(players[0]);
-            team1.push(players[i]);
-            team1.push(players[j]);
-
-            var team2 = [];
-            for (var k = 1; k < players.length; k++) {
-                if (k !== i && k !== j) {
-                    team2.push(players[k]);
-                }
-            }
-
-            var team1_score = 0;
-            for (var k = 0; k < team1.length; k++) {
-                team1_score += team1[k].elo;
-            }
-
-            var team2_score = 0;
-            for (var k = 0; k < team2.length; k++) {
-                team2_score += team2[k].elo;
-            }
-
-            if (best.difference === null) {
-                best.difference = Math.abs(team2_score - team1_score);
-                best.team1.push(team1);
-                continue;
-            }
-
-            if (best.difference < Math.abs(team2_score - team1_score)) {
-                continue;
-            }
-
-            if (best.difference === Math.abs(team2_score - team1_score)) {
-                best.team1.push(team1);
-            }
-
-            if (best.difference > Math.abs(team2_score - team1_score)) {
-                best.difference = Math.abs(team2_score - team1_score);
-                best.team1 = [team1];
-            }
-        }
-    }
-
-    var result = [];
-
-    if (best.team1.length > 1) {
-        result.push(best.team1[Math.floor(Math.random() * best.team1.length)]);
-    } else {
-        result.push(best.team1[0]);
-    }
-
-    result.push($.grep(players, function (p) {
-        for (var i = 0; i < result[0].length; i++) {
-            if (result[0][i].id === p.id) {
-                return false;
-            }
-        }
-        return true;
-    }));
-
-    // TODO: randomize team order
-
-    return result;
 }
 
 function changeModalStep(step) {
@@ -1229,11 +1186,12 @@ function changeModalStep(step) {
     $('.modal').find('[data-step="' + step + '"]').show();
 }
 
-function updateEloAverages() {
+function updateScoreAverages() {
+    // TODO: UPDATE
     $.each($('.modal-body [data-step="2"] .form-group'), function () {
         var teamSum = 0;
         $.each($(this).children('select[data-form-key="player"]'), function () {
-            teamSum += $(this).children(':selected').data('playerElo');
+            teamSum += playerObject[parseInt($(this).val())].score;
         });
 
         $(this)
@@ -1276,12 +1234,12 @@ function doLogin() {
         complete: function (xhr, status) {
             // TODO: remove loader
         },
-        success: function (data, status, xhr) {
+        success: function (data) {
             token = data.token;
             setCookie('token', token, 1);
             loginSuccess();
         },
-        error: function (xhr, status, error) {
+        error: function () {
             loginMessage('Failed to login!');
         }
     });
@@ -1473,14 +1431,14 @@ function logout() {
 
 // found at http://stackoverflow.com/a/6712080
 function nameSort(a, b) {
-    if(a.name.toLowerCase() < b.name.toLowerCase()) return -1;
-    if(a.name.toLowerCase() > b.name.toLowerCase()) return 1;
+    if (a.name.toLowerCase() < b.name.toLowerCase()) return -1;
+    if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
     return 0;
 }
 
 var sortFunctions = {
-    elo: function (a, b) {
-        return a.elo - b.elo;
+    score: function (a, b) {
+        return a.score - b.score;
     },
     name: function (a, b) {
         if (a.name.toLowerCase() < b.name.toLowerCase()) return -1;
@@ -1492,7 +1450,7 @@ var sortFunctions = {
 
 function updateUrlParameters($elem) {
     var prefix = '';
-    switch($elem.closest('table').attr('id')) {
+    switch ($elem.closest('table').attr('id')) {
         case 'players-table':
             prefix = 'p';
             break;
@@ -1505,12 +1463,12 @@ function updateUrlParameters($elem) {
 
     var params = {};
 
-    if(newSort !== prevSort) {
+    if (newSort !== prevSort) {
         params[prefix + 'sort'] = newSort;
         params[prefix + 'order'] = 'asc';
-    } else if(newSort === prevSort) {
+    } else if (newSort === prevSort) {
         params[prefix + 'sort'] = prevSort;
-        if(prevOrder === false) {
+        if (prevOrder === false) {
             params[prefix + 'order'] = 'asc';
         } else {
             params[prefix + 'order'] = prevOrder === 'asc'
@@ -1540,17 +1498,17 @@ function updateTableSortIcons() {
 function sortPlayersData(data) {
     var sortBy = getQueryVariable('psort') !== false
         ? getQueryVariable('psort')
-        : 'elo';
+        : 'score';
 
     var order = getQueryVariable('porder') !== false
         ? getQueryVariable('porder')
-        : sortBy === 'elo'
+        : sortBy === 'score'
             ? 'desc'
             : 'asc';
 
     data.sort(sortFunctions[sortBy]);
 
-    if(order === 'desc') {
+    if (order === 'desc') {
         data.reverse();
     }
 
