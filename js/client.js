@@ -290,9 +290,9 @@ function updateGameData(successCallback, errorCallback) {
 
 function getTeamPlayerNames(game, team) {
     var players = [];
-    for(var i = 0; i < game.players.length; i++) {
+    for (var i = 0; i < game.players.length; i++) {
         var player = game.players[i];
-        if(player.team == team) {
+        if (player.team == team) {
             players.push(player.name);
         }
     }
@@ -325,11 +325,11 @@ function updateGamesList() {
 function getPlayerName(id) {
     var player = playerObject[id];
 
-    if(player === undefined) {
+    if (player === undefined) {
         return 'id=' + id;
     }
 
-    return  player.name;
+    return player.name;
 }
 
 function getPlayerNames(idList, liItems) {
@@ -1368,7 +1368,7 @@ function openLoginDialog() {
 
     dialog.one('hidden.bs.modal', function () {
         dialog.remove();
-    })
+    });
 }
 
 function openConfirmLogoutDialog() {
