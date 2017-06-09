@@ -1218,16 +1218,10 @@ function doLogin() {
     var username = $('#username').val();
     var password = $('#password').val();
 
-    var usernameRegex = /^[a-zA-Z0-9]+$/;
-    var passwordRegex = usernameRegex;
+    var usernameRegex = /^[a-zA-Z0-9@.+_\-]+$/;
 
     if (username.match(usernameRegex) === null || username !== username.match(usernameRegex)[0]) {
         loginMessage('Username contains invalid characters!');
-        return;
-    }
-
-    if (password.match(passwordRegex) === null || password !== password.match(passwordRegex)[0]) {
-        loginMessage('Password contains invalid characters!');
         return;
     }
 
