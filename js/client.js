@@ -91,20 +91,25 @@ $(document).ready(function () {
     }
 });
 
-function changeUrl(paramUpdate) {
-    if (typeof (history.pushState) != "undefined") {
-
-        var pageName = location.pathname.substr(location.pathname.lastIndexOf('/') + 1);
-        var updatedSearch = getSearchParameters(paramUpdate, true);
-
-        var obj = {
-            search: updatedSearch,
-            page: pageName,
-            url: pageName + '?' + updatedSearch
-        };
-        history.pushState(obj, obj.page, obj.url);
-    } else {
+function changeUrl(parameters, callback) {
+    if (typeof (history.pushState) !== 'undefined') {
         return;
+    }
+    // TODO: SET PARAMETERS TO URL
+    //location.search = '?' + $.param(params);
+
+    var pageName = location.pathname.substr(location.pathname.lastIndexOf('/') + 1);
+    var updatedSearch = getSearchParameters(paramUpdate, true);
+
+    var obj = {
+        search: updatedSearch,
+        page: pageName,
+        url: pageName + '?' + updatedSearch
+    };
+    history.pushState(obj, obj.page, obj.url);
+
+    if($.isFunction(callback)) {
+        callback(parameters);
     }
 }
 
@@ -789,44 +794,46 @@ function openNewGameDialog() {
                                                 })
                                                 .get();
 
-                                            var teams = calculateTeams(players);
-
-                                            // Lisää step2 valintoihin kaikki pelin pelaajat ja alustaa valinnat joukkueiden perusteella
-                                            $('.modal-body [data-step="2"] select.form-control > option').remove();
-
-                                            for (var i = 0; i < players.length; i++) { // TODO: DOES NOT WORK?
-                                                $('.modal-body [data-step="2"] .form-control').append($('<option>', {
-                                                    value: players[i],
-                                                    text: playerObject[players[i]].name + ' (' + playerObject[players[i]].score + ')'
-                                                }));
-                                            }
-
-                                            $.each($('.modal-body [data-step="2"] .form-group'), function (teamIndex) {
-                                                $.each($(this).children('select'), function (playerIndex) {
-                                                    $(this).val(teams['team' + (teamIndex + 1)][playerIndex]);
-                                                    $(this).data('prev', $(this).val());
-                                                });
+                                            calculateTeams(players, function (response) {
+                                                // Lisää step2 valintoihin kaikki pelin pelaajat ja alustaa valinnat joukkueiden perusteella
+                                                // $('.modal-body [data-step="2"] select.form-control > option').remove();
+                                                //
+                                                // for (var i = 0; i < players.length; i++) { // TODO: DOES NOT WORK?
+                                                //     $('.modal-body [data-step="2"] .form-control').append($('<option>', {
+                                                //         value: players[i],
+                                                //         text: playerObject[players[i]].name + ' (' + playerObject[players[i]].score + ')'
+                                                //     }));
+                                                // }
+                                                //
+                                                // $.each($('.modal-body [data-step="2"] .form-group'), function (teamIndex) {
+                                                //     $.each($(this).children('select'), function (playerIndex) {
+                                                //         $(this).val(teams['team' + (teamIndex + 1)][playerIndex]);
+                                                //         $(this).data('prev', $(this).val());
+                                                //     });
+                                                // });
+                                                //
+                                                // // Päivittää score keskiarvot joukkueille
+                                                // updateScoreAverages();
+                                                //
+                                                // // Jos pelaaja vaihdetaan manuaalisesti päivitetään muut niin, että jokainen pelaaja on vain kerran
+                                                // $('.modal-body [data-step="2"] select.form-control').change(function () {
+                                                //     var newId = $(this).val();
+                                                //     var prev = $(this).data('prev');
+                                                //     $.each($('.modal-body [data-step="2"] select.form-control'), function () {
+                                                //         if ($(this).data('prev') === newId && $(this).data('prev') === $(this).val()) {
+                                                //             $(this).val(prev);
+                                                //             $(this).data('prev', prev);
+                                                //             return false;
+                                                //         }
+                                                //     });
+                                                //     $(this).data('prev', newId);
+                                                //     updateScoreAverages();
+                                                // });
+                                                //
+                                                // changeModalStep(2);
                                             });
 
-                                            // Päivittää score keskiarvot joukkueille
-                                            updateScoreAverages();
 
-                                            // Jos pelaaja vaihdetaan manuaalisesti päivitetään muut niin, että jokainen pelaaja on vain kerran
-                                            $('.modal-body [data-step="2"] select.form-control').change(function () {
-                                                var newId = $(this).val();
-                                                var prev = $(this).data('prev');
-                                                $.each($('.modal-body [data-step="2"] select.form-control'), function () {
-                                                    if ($(this).data('prev') === newId && $(this).data('prev') === $(this).val()) {
-                                                        $(this).val(prev);
-                                                        $(this).data('prev', prev);
-                                                        return false;
-                                                    }
-                                                });
-                                                $(this).data('prev', newId);
-                                                updateScoreAverages();
-                                            });
-
-                                            changeModalStep(2);
                                         }
                                     }),
                                     $('<button>', {
@@ -1184,13 +1191,32 @@ function changeActiveButton($btn) {
     $btn.addClass('btn-primary');
 }
 
-function calculateTeams(players) {
-    // TODO: GET FROM API ONCE AVAILABLE
+function calculateTeams(players, callback) {
 
-    return {
-        team1: [players[0], players[1], players[2]],
-        team2: [players[3], players[4], players[5]]
-    };
+    $.ajax({
+        url: server + 'API/teams/',
+        method: 'POST',
+        contentType: 'application/json',
+        headers: {
+            'Authorization': 'Token ' + token
+        },
+        data: {
+            players: JSON.stringify(players)
+        },
+        beforeSend: function () {
+            // TODO: set some kind of loader
+        },
+        complete: function (xhr, status) {
+            // TODO: remove loader
+        },
+        success: function (data) {
+            // TODO: set teams using callback
+            console.log(data);
+        },
+        error: function () {
+            // TODO: FAILED TO CONSTRUCT TEAMS
+        }
+    });
 }
 
 function changeModalStep(step) {
@@ -1493,7 +1519,7 @@ function updateUrlParameters($elem) {
         }
     }
 
-    location.search = '?' + $.param(params);
+    changeUrl(params);
 }
 
 function updateTableSortIcons() {
