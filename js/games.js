@@ -9,7 +9,7 @@
         initialize: function() {
             console.log("initializing games...");
 
-            $("#add-new-game").click(fbc.games.openNewDialog);
+            $("#add-new-game").click(fbc.games.openGameDialog);
             $("#refresh-games").click(function() {
                 fbc.games.update(fbc.games.updateTable);
             });
@@ -40,57 +40,153 @@
             });
         },
         updateTable: function() {
+            var games = fbc.games.getList().slice();
+
+            games.sort(fbc.base.sorting.date);
+            games.reverse();
+
             $("#games-table")
                 .children("tbody")
-                .children("tr")
-                .remove();
-
-            // TODO: copy game data to temp variable, perform sorting and present data
-
-            $.each(fbc.games.getList(), function() {
-                $("#games-table")
-                    .children("tbody")
-                    .append(
-                        $("<tr>", {
+                .first()
+                .html(
+                    $.map(games, function(elem) {
+                        return $("<tr>", {
                             html: [
                                 $("<td>", {
-                                    text: new Date(this.date).toDateString()
+                                    text: new Date(elem.date).toLocaleString()
                                 }),
                                 $("<td>", {
                                     text:
-                                        this.location_repr !== null
-                                            ? this.location_repr.name
+                                        elem.location_repr !== null
+                                            ? elem.location_repr.name
                                             : ""
                                 }),
                                 $("<td>", {
-                                    html: fbc.games.getPlayerNames(this)
+                                    html: fbc.games.getPlayerNames(elem)
                                 }),
                                 $("<td>", {
-                                    text: fbc.games.getStatusText(this)
+                                    text: fbc.games.getStatusText(elem)
                                 })
                             ]
-                        })
-                    );
-            });
+                        });
+                    })
+                );
         },
         getPlayerNames: function(game) {
             switch (game.state) {
                 case 0:
-                    return $('<ul>', {
+                    return $("<ul>", {
                         html: $.map(game.players, function(player) {
                             return $("<li>", { text: player.name });
                         })
-                    })
+                    });
+                case 1:
+                case 2:
+                case 4:
+                    var team1 = [];
+                    var team2 = [];
+                    var noTeam = [];
+
+                    for (var i = 0; i < game.players.length; i++) {
+                        var player = game.players[i];
+                        switch (player.team) {
+                            case 1:
+                                team1.push[player.id];
+                                break;
+                            case 2:
+                                team2.push[player.id];
+                                break;
+                            default:
+                                noTeam.push(player.id);
+                        }
+                    }
+
+                    var result = [];
+
+                    if (noTeam.length > 0) {
+                        if (team1.length > 0 || team2.length > 0) {
+                            result.push($("<p>", { text: "No team" }));
+                        }
+
+                        result.push(
+                            $("<ul>", {
+                                html: $.map(noTeam, function(player) {
+                                    return $("<li>", { text: player.name });
+                                })
+                            })
+                        );
+                    }
+
+                    if (team1.length > 0) {
+                        result.push($("<p>", { text: "Team 1" }));
+
+                        result.push(
+                            $("<ul>", {
+                                html: $.map(team1, function(player) {
+                                    return $("<li>", { text: player.name });
+                                })
+                            })
+                        );
+                    }
+
+                    if (team2.length > 0) {
+                        result.push($("<p>", { text: "Team 2" }));
+
+                        result.push(
+                            $("<ul>", {
+                                html: $.map(team2, function(player) {
+                                    return $("<li>", { text: player.name });
+                                })
+                            })
+                        );
+                    }
+
+                    return result;
+                default:
+                    return "";
             }
-            return "TODO: implement getPlayerNames for this game state";
         },
         getStatusText: function(game) {
-            return "TODO: implement getStatusText";
-            // game.team1_score + "-" + game.team2_score
+            switch (game.state) {
+                case 0:
+                    return (
+                        "Game is missing " +
+                        (fbc.base.parameters.maxPlayers - game.players.length) +
+                        " players"
+                    );
+                case 1:
+                    return "Game is full";
+                case 2:
+                    return (
+                        "Result " +
+                        game.team1_score +
+                        "-" +
+                        game.team2_score +
+                        " is waiting for confirmation"
+                    );
+                case 4:
+                    return (
+                        "Result " +
+                        game.team1_score +
+                        "-" +
+                        game.team2_score +
+                        " has been confirmed"
+                    );
+                default:
+                    return "";
+            }
         },
-        openNewDialog: function() {
+        openGameDialog: function(parameters) {
+            parameters = parameters || {};
+            if (!parameters.hasOwnProperty("id")) {
+                parameters["new"] = true;
+            }
+
+            var players = fbc.players.getList().slice();
+            players.sort(fbc.base.sorting.name);
+
             var dialog = $("<div>", {
-                id: "newGameModal",
+                id: "gameModal",
                 class: "modal fade",
                 html: $("<div>", {
                     class: "modal-dialog",
@@ -108,7 +204,10 @@
                                     }),
                                     $("<h4>", {
                                         class: "modal-title",
-                                        text: "Create new game"
+                                        text:
+                                            parameters.new === true
+                                                ? "Create new game"
+                                                : "Modify game"
                                     })
                                 ]
                             }),
@@ -120,8 +219,31 @@
                                             $("<form>", {
                                                 html: [
                                                     $("<div>", {
+                                                        id: "game-info",
                                                         class: "form-group",
                                                         html: [
+                                                            $("<label>", {
+                                                                text: "Name"
+                                                            }),
+                                                            $("<input>", {
+                                                                type: "text",
+                                                                class:
+                                                                    "form-control",
+                                                                "data-form-key":
+                                                                    "name"
+                                                            }),
+                                                            $("<label>", {
+                                                                text:
+                                                                    "Date and time"
+                                                            }),
+                                                            $("<input>", {
+                                                                type:
+                                                                    "datetime-local",
+                                                                class:
+                                                                    "form-control",
+                                                                "data-form-key":
+                                                                    "date"
+                                                            }),
                                                             $("<label>", {
                                                                 text: "Location"
                                                             }),
@@ -133,20 +255,6 @@
                                                             }),
                                                             $("<label>", {
                                                                 text: "Players"
-                                                            }),
-                                                            $("<select>", {
-                                                                class:
-                                                                    "form-control",
-                                                                "data-form-key":
-                                                                    "player"
-                                                            }),
-                                                            $("<input>", {
-                                                                class:
-                                                                    "btn btn-success",
-                                                                click: function() {
-                                                                    // TODO: ADD NEW PLAYER SELECT
-                                                                    // TODO: MAKE SURE SAME OPTION CANNOT BE SELECTED TWICE
-                                                                }
                                                             })
                                                         ]
                                                     })
@@ -170,7 +278,7 @@
                                                     // TODO: POST NEW GAME
 
                                                     // TODO: ON SUCCESS:
-                                                    $(this)
+                                                    $(elem)
                                                         .closest(".modal")
                                                         .modal("hide");
                                                 }
@@ -191,10 +299,19 @@
                 })
             });
 
-            // add players to step 1 dropdowns
-            var players = fbc.players.getList().slice();
+            var gameInfo = dialog.find("#game-info");
 
-            players.sort(nameSort);
+            if (
+                gameInfo.children('select[data-form-key="player"]').length <
+                fbc.base.parameters.maxPlayers
+            ) {
+                gameInfo.append(
+                    $("<select>", {
+                        class: "form-control",
+                        "data-form-key": "player"
+                    })
+                );
+            }
 
             for (var i = 0; i < players.length; i++) {
                 dialog.find('select[data-form-key="player"]').append(
@@ -351,7 +468,7 @@
                                                                         click: function() {
                                                                             changeActiveButton(
                                                                                 $(
-                                                                                    this
+                                                                                    elem
                                                                                 )
                                                                             );
                                                                         },
@@ -376,7 +493,7 @@
                                                                         click: function() {
                                                                             changeActiveButton(
                                                                                 $(
-                                                                                    this
+                                                                                    elem
                                                                                 )
                                                                             );
                                                                         },
@@ -401,7 +518,7 @@
                                                                         click: function() {
                                                                             changeActiveButton(
                                                                                 $(
-                                                                                    this
+                                                                                    elem
                                                                                 )
                                                                             );
                                                                         },
@@ -426,7 +543,7 @@
                                                                         click: function() {
                                                                             changeActiveButton(
                                                                                 $(
-                                                                                    this
+                                                                                    elem
                                                                                 )
                                                                             );
                                                                         },
@@ -458,14 +575,14 @@
                                             ongoingGames[gameIndex].team2,
                                         text: "Post result",
                                         click: function() {
-                                            var $result = $(this)
+                                            var $result = $(elem)
                                                 .closest(".modal")
                                                 .find(
                                                     "button.btn-primary[data-team1-score][data-team2-score]"
                                                 );
                                             if ($result.length === 0) {
                                                 enterResultMessage(
-                                                    $(this)
+                                                    $(elem)
                                                         .closest(".modal")
                                                         .find(".modal-body"),
                                                     "Select game result!"
@@ -473,7 +590,7 @@
                                                 return;
                                             }
 
-                                            var gameId = $(this).data("gameId");
+                                            var gameId = $(elem).data("gameId");
                                             var game = ongoingGames.filter(
                                                 function(game) {
                                                     return game.id === gameId;
@@ -481,10 +598,10 @@
                                             );
 
                                             var data = {
-                                                team1: $(this)
+                                                team1: $(elem)
                                                     .data("team1")
                                                     .split(","),
-                                                team2: $(this)
+                                                team2: $(elem)
                                                     .data("team2")
                                                     .split(","),
                                                 team1_score: $result.data(
@@ -505,7 +622,7 @@
                                                 removeOngoingGame(gameId);
                                             });
 
-                                            $(this)
+                                            $(elem)
                                                 .closest(".modal")
                                                 .modal("hide");
                                         }
@@ -520,11 +637,11 @@
                                         type: "button",
                                         class: "btn btn-danger float-left",
                                         click: function() {
-                                            var gameId = $(this)
+                                            var gameId = $(elem)
                                                 .siblings("[data-game-id]")
                                                 .data("gameId");
                                             removeOngoingGame(gameId);
-                                            $(this)
+                                            $(elem)
                                                 .closest(".modal")
                                                 .modal("hide");
                                         },

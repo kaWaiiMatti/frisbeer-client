@@ -54,41 +54,42 @@
         },
         updateTable: function() {
             ///<summary>Update #Players table</summary>
-            $("#players-table")
-                .children("tbody")
-                .children("tr")
-                .remove();
+            var players = fbc.players.getList().slice();
+
+            players.sort(fbc.base.sorting.score);
+            players.reverse();
 
             // TODO: copy player data to temp variable, perform sorting and present data
 
-            $.each(fbc.players.getList(), function() {
-                $("#players-table")
-                    .children("tbody")
-                    .append(
-                        $("<tr>", {
+            $("#players-table")
+                .children("tbody")
+                .first()
+                .html(
+                    $.map(players, function(elem) {
+                        return $("<tr>", {
                             html: [
                                 $("<td>", {
                                     html: $("<img>", {
                                         src:
-                                            this.rank !== null
-                                                ? this.rank.image_url
+                                            elem.rank !== null
+                                                ? elem.rank.image_url
                                                 : "",
                                         title:
-                                            this.rank !== null
-                                                ? this.rank.name
+                                            elem.rank !== null
+                                                ? elem.rank.name
                                                 : ""
                                     })
                                 }),
                                 $("<td>", {
-                                    text: this.name
+                                    text: elem.name
                                 }),
                                 $("<td>", {
-                                    text: this.score
+                                    text: elem.score
                                 })
                             ]
-                        })
-                    );
-            });
+                        });
+                    })
+                );
         },
         openNewDialog: function() {
             var dialog = $("<div>", {

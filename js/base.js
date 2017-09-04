@@ -383,6 +383,9 @@ $(document).ready(function() {
                 if (a.name.toLowerCase() < b.name.toLowerCase()) return -1;
                 if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
                 return 0;
+            },
+            date: function(a, b) {
+                return new Date(a.date) - new Date(b.date);
             }
         },
 
