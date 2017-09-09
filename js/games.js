@@ -280,6 +280,11 @@
                                                           $btn.addClass(
                                                               "disabled"
                                                           );
+                                                          $btn.prop(
+                                                              "disabled",
+                                                              true
+                                                          );
+
                                                           var $modal = $btn.closest(
                                                               ".modal"
                                                           );
@@ -304,6 +309,11 @@
                                                               function() {
                                                                   $btn.removeClass(
                                                                       "disabled"
+                                                                  );
+
+                                                                  $btn.prop(
+                                                                      "disabled",
+                                                                      false
                                                                   );
                                                               }
                                                           );
@@ -474,17 +484,12 @@
             };
         },
         postNew: function(data, successCallback, errorCallback) {
-            if (token === undefined || token === null || token.length === 0) {
-                // TODO: SET ERROR MESSAGE
-                return;
-            }
-
             $.ajax({
                 url: fbc.base.parameters.server + "API/games/",
                 method: "POST",
                 contentType: "application/json",
                 headers: {
-                    Authorization: "Token " + token
+                    Authorization: "Token " + fbc.base.parameters.token
                 },
                 data: JSON.stringify(data),
                 beforeSend: function() {

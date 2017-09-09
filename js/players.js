@@ -218,7 +218,7 @@
                 method: "POST",
                 contentType: "application/json",
                 headers: {
-                    Authorization: "Token " + token
+                    Authorization: "Token " + fbc.base.parameters.token
                 },
                 data: JSON.stringify(param),
                 beforeSend: function() {
