@@ -343,7 +343,7 @@ $(document).ready(function() {
                                                 "btn btn-primary float-right",
                                             text: "Logout",
                                             click: function() {
-                                                logout();
+                                                fbc.base.logout.perform();
                                             }
                                         }),
                                         $("<button>", {
