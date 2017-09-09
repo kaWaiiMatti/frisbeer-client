@@ -124,7 +124,7 @@ $(document).ready(function() {
                 ///<summary></summary>
                 var auth_token = fbc.base.cookies.get("token");
                 if (auth_token !== null && auth_token.length > 0) {
-                    token = auth_token;
+                    fbc.base.parameters.token = auth_token;
                     fbc.base.login.success();
                 } else {
                     $('[data-logged-in="true"]').hide();
@@ -162,8 +162,8 @@ $(document).ready(function() {
                         // TODO: remove loader
                     },
                     success: function(data) {
-                        token = data.token;
-                        fbc.base.cookies.set("token", token, 1);
+                        fbc.base.parameters.token = data.token;
+                        fbc.base.cookies.set("token", fbc.base.parameters.token, 1);
                         fbc.base.login.success();
                     },
                     error: function() {
@@ -367,7 +367,7 @@ $(document).ready(function() {
                 });
             },
             perform: function() {
-                token = null;
+                fbc.base.parameters.token = null;
                 fbc.base.cookies.set("token", "");
                 $('[data-logged-in="true"]').hide();
                 $('[data-logged-in="false"]').show();
