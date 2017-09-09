@@ -269,20 +269,60 @@
                                 html: [
                                     $("<div>", {
                                         html: [
-                                            $("<button>", {
-                                                type: "button",
-                                                class:
-                                                    "btn btn-primary float-right",
-                                                text: "Create",
-                                                click: function() {
-                                                    // TODO: POST NEW GAME
+                                            parameters.new === true
+                                                ? $("<button>", {
+                                                      type: "button",
+                                                      class:
+                                                          "btn btn-primary float-right",
+                                                      text: "Create",
+                                                      click: function() {
+                                                          var $btn = $(this);
+                                                          $btn.addClass(
+                                                              "disabled"
+                                                          );
+                                                          var $modal = $btn.closest(
+                                                              ".modal"
+                                                          );
 
-                                                    // TODO: ON SUCCESS:
-                                                    $(elem)
-                                                        .closest(".modal")
-                                                        .modal("hide");
-                                                }
-                                            }),
+                                                          var data = fbc.games.gatherGameInfo(
+                                                              $modal
+                                                                  .find(
+                                                                      $(
+                                                                          "#game-info"
+                                                                      )
+                                                                  )
+                                                                  .first()
+                                                          );
+
+                                                          fbc.games.postNew(
+                                                              data,
+                                                              function() {
+                                                                  $modal.modal(
+                                                                      "hide"
+                                                                  );
+                                                              },
+                                                              function() {
+                                                                  $btn.removeClass(
+                                                                      "disabled"
+                                                                  );
+                                                              }
+                                                          );
+                                                      }
+                                                  })
+                                                : $("<button>", {
+                                                      type: "button",
+                                                      class:
+                                                          "btn btn-primary float-right",
+                                                      text: "Modify",
+                                                      click: function() {
+                                                          // TODO: POST CHANGES
+
+                                                          // TODO: ON SUCCESS:
+                                                          $(elem)
+                                                              .closest(".modal")
+                                                              .modal("hide");
+                                                      }
+                                                  }),
                                             $("<button>", {
                                                 type: "button",
                                                 class:
@@ -313,8 +353,17 @@
                 );
             }
 
+            var $playerSelects = dialog.find('select[data-form-key="player"]');
+
+            $playerSelects.append(
+                $("<option>", {
+                    value: "",
+                    text: ""
+                })
+            );
+
             for (var i = 0; i < players.length; i++) {
-                dialog.find('select[data-form-key="player"]').append(
+                $playerSelects.append(
                     $("<option>", {
                         value: players[i].id,
                         text: players[i].name + " (" + players[i].score + ")"
@@ -322,8 +371,64 @@
                 );
             }
 
-            dialog.on("change", 'select[data-form-key="player"]', function() {
-                // TODO: REMOVE ALL BUT SELECTED VALUES, LIST ALL BUT ADDED PLAYERS, ADD LISTED PLAYERS TO EACH OPTION
+            dialog.on("change", 'select[data-form-key="player"]', function(e) {
+                var $target = $(e.currentTarget);
+
+                var $emptySelections = $playerSelects.filter(function() {
+                    return $(this).val() === "";
+                });
+
+                if ($target.val() === "") {
+                    // player selection was removed
+
+                    // remove other empty selections
+                    var $otherEmptySelections = $emptySelections.not($target);
+                    $otherEmptySelections.remove();
+                    $playerSelects = $playerSelects.not($otherEmptySelections);
+
+                    // move the current target to last
+                    gameInfo.append($target);
+                } else {
+                    // player selection was added
+                    if (
+                        $emptySelections.length === 0 &&
+                        $playerSelects.length < fbc.base.parameters.maxPlayers
+                    ) {
+                        var $newSelect = $target.clone();
+                        $newSelect.val("");
+
+                        $playerSelects = $playerSelects.add($newSelect);
+                        gameInfo.append($newSelect);
+                    }
+                }
+
+                var selectedValues = $.grep(
+                    $playerSelects
+                        .map(function() {
+                            return $(this).val();
+                        })
+                        .get(),
+                    function(item) {
+                        return item !== "";
+                    }
+                );
+
+                $playerSelects.children("option").prop("disabled", false);
+
+                $playerSelects.each(function() {
+                    $this = $(this);
+                    var selectedValue = $this.val();
+
+                    var disableValues = $.grep(selectedValues, function(item) {
+                        return item !== selectedValue;
+                    });
+
+                    $.each(disableValues, function(index, item) {
+                        $this
+                            .children('option[value="' + item + '"]')
+                            .prop("disabled", true);
+                    });
+                });
             });
 
             $("body").append(dialog);
@@ -332,6 +437,41 @@
             dialog.one("hidden.bs.modal", function() {
                 dialog.remove();
             });
+        },
+        gatherGameInfo: function($element) {
+            var name = $element
+                .children('input[data-form-key="name"]')
+                .first()
+                .val();
+
+            var date = $element
+                .children('input[data-form-key="date"]')
+                .first()
+                .val();
+
+            var location = $element
+                .children('input[data-form-key="location"]')
+                .first()
+                .val();
+
+            var players = $element
+                .children('select[data-form-key="player"]')
+                .filter(function() {
+                    return $(this).val() !== "";
+                })
+                .map(function() {
+                    return {
+                        id: parseInt($(this).val())
+                    };
+                })
+                .get();
+
+            return {
+                name: name,
+                date: date !== "" ? new Date(date).toISOString() : "",
+                location: location,
+                players: players
+            };
         },
         postNew: function(data, successCallback, errorCallback) {
             if (token === undefined || token === null || token.length === 0) {
@@ -591,11 +731,6 @@
                                             }
 
                                             var gameId = $(elem).data("gameId");
-                                            var game = ongoingGames.filter(
-                                                function(game) {
-                                                    return game.id === gameId;
-                                                }
-                                            );
 
                                             var data = {
                                                 team1: $(elem)
@@ -618,13 +753,12 @@
                                                 ).toISOString();
                                             }
 
-                                            postNewGame(data, function() {
-                                                removeOngoingGame(gameId);
+                                            // TODO: IMPLEMENT
+                                            postResult(data, function() {
+                                                $(elem)
+                                                    .closest(".modal")
+                                                    .modal("hide");
                                             });
-
-                                            $(elem)
-                                                .closest(".modal")
-                                                .modal("hide");
                                         }
                                     }),
                                     $("<button>", {
