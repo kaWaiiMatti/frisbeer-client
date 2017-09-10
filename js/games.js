@@ -66,6 +66,31 @@
                                 }),
                                 $("<td>", {
                                     text: fbc.games.getStatusText(elem)
+                                }),
+                                $("<td>", {
+                                    html: [
+                                        elem.state === 0 || elem.state === 1
+                                            ? $("<input>", {
+                                                  "data-logged-in": "true",
+                                                  type: "button",
+                                                  class: "btn btn-primary",
+                                                  value: "Modify",
+                                                  click: function() {
+                                                      // TODO: OPEN MODIFY DIALOG
+                                                  }
+                                              })
+                                            : null,
+                                        elem.state === 1
+                                            ? $("<input>", {
+                                                  type: "button",
+                                                  class: "btn btn-primary",
+                                                  value: "Enter result",
+                                                  click: function() {
+                                                      // TODO: OPEN ENTER RESULT DIALOG
+                                                  }
+                                              })
+                                            : null
+                                    ]
                                 })
                             ]
                         });
