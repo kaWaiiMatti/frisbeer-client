@@ -2,9 +2,12 @@
     fbc.locations = {
         dict: {},
         getList: function() {
-            return $.map(fbc.locations.dict, function(location) {
+            var locations = $.map(fbc.locations.dict, function(location) {
                 return location;
             });
+
+            locations.sort(fbc.base.sorting.name);
+            return locations;
         },
         initialize: function() {
             console.log("initializing locations...");
