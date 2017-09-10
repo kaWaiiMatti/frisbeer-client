@@ -182,8 +182,7 @@
                 parameters["new"] = true;
             }
 
-            var players = fbc.players.getList().slice();
-            players.sort(fbc.base.sorting.name);
+            var players = fbc.players.getList();
 
             var dialog = $("<div>", {
                 id: "gameModal",
