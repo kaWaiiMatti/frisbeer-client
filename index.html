@@ -33,6 +33,7 @@
         <ul class="menu-items">
             <li><a data-target-tab="players">Players</a></li>
             <li><a data-target-tab="games">Games</a></li>
+            <li><a data-target-tab="locations">Locations</a></li>
             <li><a data-target-tab="login" data-logged-in="false">Login</a></li>
             <li><a data-target-tab="logout" data-logged-in="true">Logout</a></li>
         </ul>
@@ -76,6 +77,27 @@
                                 <th>Players</th>
                                 <th>State</th>
                                 <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="locations">
+
+            <button id="refresh-locations" class="btn btn-primary float-right">Refresh</button>
+            <button id="add-new-location" class="btn btn-primary float-right" data-logged-in="true">Add new location</button>
+
+            <div class="row">
+                <div class="col-xs-12">
+                    <h3>Locations</h3>
+                    <table id="locations-table" class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Coordinates</th>
                             </tr>
                         </thead>
                         <tbody></tbody>

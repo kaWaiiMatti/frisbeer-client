@@ -2,9 +2,12 @@
     fbc.players = {
         dict: {},
         getList: function() {
-            return $.map(fbc.players.dict, function(player) {
+            var players = $.map(fbc.players.dict, function(player) {
                 return player;
             });
+
+            players.sort(fbc.base.sorting.name);
+            return players;
         },
         initialize: function() {
             ///<summary>Players initialization</summary>

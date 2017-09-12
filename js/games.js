@@ -207,8 +207,7 @@
                 parameters["new"] = true;
             }
 
-            var players = fbc.players.getList().slice();
-            players.sort(fbc.base.sorting.name);
+            var players = fbc.players.getList();
 
             var dialog = $("<div>", {
                 id: "gameModal",
@@ -376,6 +375,28 @@
 
             var gameInfo = dialog.find("#game-info");
 
+            var locationSelect = gameInfo
+                .find('select[data-form-key="location"]')
+                .first();
+
+            locationSelect.html(
+                $.map(fbc.locations.getList(), function(item) {
+                    return $("<option>", {
+                        value: item.id,
+                        text: item.name
+                    });
+                })
+            );
+
+            locationSelect.prepend(
+                $("<option>", {
+                    value: "",
+                    text: ""
+                })
+            );
+
+            locationSelect.val("");
+
             if (
                 gameInfo.children('select[data-form-key="player"]').length <
                 fbc.base.parameters.maxPlayers
@@ -485,7 +506,7 @@
                 .val();
 
             var location = $element
-                .children('input[data-form-key="location"]')
+                .children('select[data-form-key="location"]')
                 .first()
                 .val();
 
@@ -504,7 +525,7 @@
             return {
                 name: name,
                 date: date !== "" ? new Date(date).toISOString() : "",
-                location: location,
+                location: location !== '' ? parseInt(location) : '',
                 players: players
             };
         },
