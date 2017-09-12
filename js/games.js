@@ -27,7 +27,12 @@
                     fbc.base.loader.remove("games");
                 },
                 success: function(data) {
-                    fbc.games.dict = data;
+                    gamesObject = {};
+                    for (var i = 0; i < data.length; i++) {
+                        gamesObject[data[i].id] = data[i];
+                    }
+                    fbc.games.dict = gamesObject;
+
                     if ($.isFunction(successCallback)) {
                         successCallback(data);
                     }
