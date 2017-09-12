@@ -89,14 +89,16 @@
                                                   }
                                               })
                                             : null,
-                                        elem.state === 0 || elem.state === 1
+                                        elem.state === 0
                                             ? $("<input>", {
                                                   "data-logged-in": "true",
                                                   type: "button",
                                                   class: "btn btn-primary",
                                                   value: "Modify",
                                                   click: function() {
-                                                      // TODO: OPEN MODIFY DIALOG
+                                                      fbc.games.openGameDialog(
+                                                          elem
+                                                      );
                                                   }
                                               })
                                             : null,
@@ -253,10 +255,10 @@
                     return "";
             }
         },
-        openGameDialog: function(parameters) {
-            parameters = parameters || {};
-            if (!parameters.hasOwnProperty("id")) {
-                parameters["new"] = true;
+        openGameDialog: function(game) {
+            game = game || {};
+            if (!game.hasOwnProperty("id")) {
+                game["new"] = true;
             }
 
             var players = fbc.players.getList();
@@ -281,7 +283,7 @@
                                     $("<h4>", {
                                         class: "modal-title",
                                         text:
-                                            parameters.new === true
+                                            game.new === true
                                                 ? "Create new game"
                                                 : "Modify game"
                                     })
@@ -302,6 +304,7 @@
                                                                 text: "Name"
                                                             }),
                                                             $("<input>", {
+                                                                disabled: !game.new,
                                                                 type: "text",
                                                                 class:
                                                                     "form-control",
@@ -313,6 +316,7 @@
                                                                     "Date and time"
                                                             }),
                                                             $("<input>", {
+                                                                disabled: !game.new,
                                                                 type:
                                                                     "datetime-local",
                                                                 class:
@@ -324,6 +328,7 @@
                                                                 text: "Location"
                                                             }),
                                                             $("<select>", {
+                                                                disabled: !game.new,
                                                                 class:
                                                                     "form-control",
                                                                 "data-form-key":
@@ -345,7 +350,7 @@
                                 html: [
                                     $("<div>", {
                                         html: [
-                                            parameters.new === true
+                                            game.new === true
                                                 ? $("<button>", {
                                                       type: "button",
                                                       class:
@@ -395,26 +400,15 @@
                                                           );
                                                       }
                                                   })
-                                                : $("<button>", {
-                                                      type: "button",
-                                                      class:
-                                                          "btn btn-primary float-right",
-                                                      text: "Modify",
-                                                      click: function() {
-                                                          // TODO: POST CHANGES
-
-                                                          // TODO: ON SUCCESS:
-                                                          $(elem)
-                                                              .closest(".modal")
-                                                              .modal("hide");
-                                                      }
-                                                  }),
+                                                : null,
                                             $("<button>", {
                                                 type: "button",
                                                 class:
                                                     "btn btn-danger float-right",
                                                 "data-dismiss": "modal",
-                                                text: "Cancel"
+                                                text: game.new
+                                                    ? "Cancel"
+                                                    : "Close"
                                             })
                                         ]
                                     })
@@ -447,7 +441,23 @@
                 })
             );
 
-            locationSelect.val("");
+            if (game.new) {
+                locationSelect.val("");
+            } else {
+                gameInfo
+                    .find('input[data-form-key="name"]')
+                    .first()
+                    .val(game.name);
+
+                gameInfo
+                    .find('input[data-form-key="date"]')
+                    .first()
+                    .val(new Date(game.date));
+
+                locationSelect.val(
+                    game.location !== null ? game.location.id : ""
+                );
+            }
 
             if (
                 gameInfo.children('select[data-form-key="player"]').length <
@@ -648,7 +658,7 @@
                     })
                 })
             });
-            
+
             $("body").append(dialog);
             dialog.modal();
 
