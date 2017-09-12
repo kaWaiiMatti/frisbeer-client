@@ -74,6 +74,21 @@
                                 }),
                                 $("<td>", {
                                     html: [
+                                        elem.state === 0 &&
+                                        elem.players.length ===
+                                            fbc.base.parameters.maxPlayers
+                                            ? $("<input>", {
+                                                  "data-logged-in": "true",
+                                                  type: "button",
+                                                  class: "btn btn-primary",
+                                                  value: "Form teams",
+                                                  click: function() {
+                                                      fbc.games.confirmFormTeams(
+                                                          elem.id
+                                                      );
+                                                  }
+                                              })
+                                            : null,
                                         elem.state === 0 || elem.state === 1
                                             ? $("<input>", {
                                                   "data-logged-in": "true",
@@ -111,6 +126,38 @@
                         })
                     });
                 case 1:
+                    return [
+                        $("<p>", {
+                            text: "Team 1"
+                        }),
+                        $("<ul>", {
+                            html: $.map(
+                                $.grep(game.players, function(p) {
+                                    return p.team === 1;
+                                }),
+                                function(p) {
+                                    return $("<li>", {
+                                        text: p.name
+                                    });
+                                }
+                            )
+                        }),
+                        $("<p>", {
+                            text: "Team 2"
+                        }),
+                        $("<ul>", {
+                            html: $.map(
+                                $.grep(game.players, function(p) {
+                                    return p.team === 2;
+                                }),
+                                function(p) {
+                                    return $("<li>", {
+                                        text: p.name
+                                    });
+                                }
+                            )
+                        })
+                    ];
                 case 2:
                 case 4:
                     var team1 = [];
@@ -499,6 +546,116 @@
                 dialog.remove();
             });
         },
+        confirmFormTeams: function(gameId) {
+            var dialog = $("<div>", {
+                id: "formTeamsModal",
+                class: "modal fade",
+                html: $("<div>", {
+                    class: "modal-dialog",
+                    html: $("<div>", {
+                        class: "modal-content",
+                        html: [
+                            $("<div>", {
+                                class: "modal-header",
+                                html: [
+                                    $("<button>", {
+                                        type: "button",
+                                        class: "close",
+                                        "data-dismiss": "modal",
+                                        html: "&times;"
+                                    }),
+                                    $("<h4>", {
+                                        class: "modal-title",
+                                        text: "Form teams"
+                                    })
+                                ]
+                            }),
+                            $("<div>", {
+                                class: "modal-body",
+                                html: [
+                                    $("<div>", {
+                                        html: [
+                                            $("<p>", {
+                                                text: "Players:"
+                                            }),
+                                            $("<ul>", {
+                                                html: $.map(
+                                                    fbc.games.dict[gameId]
+                                                        .players,
+                                                    function(player) {
+                                                        return $("<li>", {
+                                                            text: player.name
+                                                        });
+                                                    }
+                                                )
+                                            })
+                                        ]
+                                    })
+                                ]
+                            }),
+                            $("<div>", {
+                                class: "modal-footer",
+                                html: [
+                                    $("<div>", {
+                                        html: [
+                                            $("<button>", {
+                                                type: "button",
+                                                class:
+                                                    "btn btn-primary float-right",
+                                                text: "Form",
+                                                click: function() {
+                                                    var $btn = $(this);
+                                                    $btn.addClass("disabled");
+                                                    $btn.prop("disabled", true);
+
+                                                    var $modal = $btn.closest(
+                                                        ".modal"
+                                                    );
+
+                                                    fbc.games.patchState(
+                                                        gameId,
+                                                        1,
+                                                        function() {
+                                                            $modal.modal(
+                                                                "hide"
+                                                            );
+                                                        },
+                                                        function() {
+                                                            $btn.removeClass(
+                                                                "disabled"
+                                                            );
+
+                                                            $btn.prop(
+                                                                "disabled",
+                                                                false
+                                                            );
+                                                        }
+                                                    );
+                                                }
+                                            }),
+                                            $("<button>", {
+                                                type: "button",
+                                                class:
+                                                    "btn btn-danger float-right",
+                                                "data-dismiss": "modal",
+                                                text: "Cancel"
+                                            })
+                                        ]
+                                    })
+                                ]
+                            })
+                        ]
+                    })
+                })
+            });
+            
+            $("body").append(dialog);
+            dialog.modal();
+
+            dialog.one("hidden.bs.modal", function() {
+                dialog.remove();
+            });
+        },
         gatherGameInfo: function($element) {
             var name = $element
                 .children('input[data-form-key="name"]')
@@ -530,7 +687,7 @@
             return {
                 name: name,
                 date: date !== "" ? new Date(date).toISOString() : "",
-                location: location !== '' ? parseInt(location) : '',
+                location: location !== "" ? parseInt(location) : "",
                 players: players
             };
         },
@@ -562,6 +719,46 @@
                     }
                     console.log(
                         "ERROR POSTING NEW GAME:" + xhr + status + error
+                    );
+                }
+            });
+        },
+        patchState: function(gameId, state, successCallback, errorCallback) {
+            $.ajax({
+                url: fbc.base.parameters.server + "API/games/" + gameId + "/",
+                method: "PATCH",
+                contentType: "application/json",
+                headers: {
+                    Authorization: "Token " + fbc.base.parameters.token
+                },
+                data: JSON.stringify({
+                    state: state
+                }),
+                beforeSend: function() {
+                    // TODO: do something
+                },
+                complete: function(xhr, status) {
+                    // TODO: do something
+                },
+                success: function(data) {
+                    fbc.games.update(fbc.games.updateTable);
+
+                    if ($.isFunction(successCallback)) {
+                        successCallback(data);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    if ($.isFunction(errorCallback)) {
+                        errorCallback(xhr, status, error);
+                    }
+                    console.log(
+                        "ERROR PATCHING GAME STATE: gameId" +
+                            gameId +
+                            ",state:" +
+                            state +
+                            xhr +
+                            status +
+                            error
                     );
                 }
             });
