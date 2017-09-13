@@ -163,7 +163,11 @@ $(document).ready(function() {
                     },
                     success: function(data) {
                         fbc.base.parameters.token = data.token;
-                        fbc.base.cookies.set("token", fbc.base.parameters.token, 1);
+                        fbc.base.cookies.set(
+                            "token",
+                            fbc.base.parameters.token,
+                            1
+                        );
                         fbc.base.login.success();
                     },
                     error: function() {
@@ -479,6 +483,24 @@ $(document).ready(function() {
                 .removeClass("btn-primary");
 
             $btn.addClass("btn-primary");
+        },
+
+        disableValuesFromOtherSelects: function($selects) {
+            $selects.children("option").prop("disabled", false);
+
+            $selects.each(function() {
+                var $this = $(this);
+                var value = $this.val();
+
+                if(value === '') {
+                    return;
+                }
+                
+                $selects
+                    .not($this)
+                    .children('option[value="' + value + '"]')
+                    .prop("disabled", true);
+            });
         }
     };
 })(fbc);

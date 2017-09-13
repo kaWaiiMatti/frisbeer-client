@@ -94,7 +94,7 @@
                                                   "data-logged-in": "true",
                                                   type: "button",
                                                   class: "btn btn-primary",
-                                                  value: "Modify",
+                                                  value: "Edit game",
                                                   click: function() {
                                                       fbc.games.openGameDialog(
                                                           elem
@@ -285,7 +285,7 @@
                                         text:
                                             game.new === true
                                                 ? "Create new game"
-                                                : "Modify game"
+                                                : "Edit game"
                                     })
                                 ]
                             }),
@@ -449,20 +449,28 @@
                     .first()
                     .val(game.name);
 
+                var dateString = new Date(game.date).toISOString();
+
                 gameInfo
                     .find('input[data-form-key="date"]')
                     .first()
-                    .val(new Date(game.date));
+                    .val(dateString.substr(0, dateString.length - 1));
 
                 locationSelect.val(
                     game.location !== null ? game.location.id : ""
                 );
             }
 
-            if (
-                gameInfo.children('select[data-form-key="player"]').length <
-                fbc.base.parameters.maxPlayers
-            ) {
+            for (var i = 0; i < game.players.length; i++) {
+                gameInfo.append(
+                    $("<select>", {
+                        class: "form-control",
+                        "data-form-key": "player"
+                    })
+                );
+            }
+
+            if (game.players.length < fbc.base.parameters.maxPlayers) {
                 gameInfo.append(
                     $("<select>", {
                         class: "form-control",
@@ -488,6 +496,14 @@
                     })
                 );
             }
+
+            for (var i = 0; i < game.players.length; i++) {
+                var $elem = $playerSelects.eq(i);
+                $elem.val(game.players[i].id);
+                $elem.data('value', game.players[i].id);
+            }
+
+            fbc.base.disableValuesFromOtherSelects($playerSelects);
 
             dialog.on("change", 'select[data-form-key="player"]', function(e) {
                 var $target = $(e.currentTarget);
@@ -520,33 +536,7 @@
                     }
                 }
 
-                var selectedValues = $.grep(
-                    $playerSelects
-                        .map(function() {
-                            return $(this).val();
-                        })
-                        .get(),
-                    function(item) {
-                        return item !== "";
-                    }
-                );
-
-                $playerSelects.children("option").prop("disabled", false);
-
-                $playerSelects.each(function() {
-                    $this = $(this);
-                    var selectedValue = $this.val();
-
-                    var disableValues = $.grep(selectedValues, function(item) {
-                        return item !== selectedValue;
-                    });
-
-                    $.each(disableValues, function(index, item) {
-                        $this
-                            .children('option[value="' + item + '"]')
-                            .prop("disabled", true);
-                    });
-                });
+                fbc.base.disableValuesFromOtherSelects($playerSelects);
             });
 
             $("body").append(dialog);
