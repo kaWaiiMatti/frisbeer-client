@@ -492,15 +492,23 @@ $(document).ready(function() {
                 var $this = $(this);
                 var value = $this.val();
 
-                if(value === '') {
+                if (value === "") {
                     return;
                 }
-                
+
                 $selects
                     .not($this)
                     .children('option[value="' + value + '"]')
                     .prop("disabled", true);
             });
+        },
+
+        hideElementAfter: function($element, time) {
+            setTimeout(function() {
+                $element.fadeOut(500, function() {
+                    $element.remove();
+                });
+            }, time);
         }
     };
 })(fbc);

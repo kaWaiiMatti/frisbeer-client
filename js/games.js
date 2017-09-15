@@ -500,7 +500,7 @@
             for (var i = 0; i < game.players.length; i++) {
                 var $elem = $playerSelects.eq(i);
                 $elem.val(game.players[i].id);
-                $elem.data('value', game.players[i].id);
+                $elem.data("value", game.players[i].id);
             }
 
             fbc.base.disableValuesFromOtherSelects($playerSelects);
@@ -541,6 +541,12 @@
 
             $("body").append(dialog);
             dialog.modal();
+
+            if (!game.new) {
+                dialog.one("hidden.bs.modal", function() {
+                    fbc.games.update(fbc.games.updateTable);
+                });
+            }
 
             dialog.one("hidden.bs.modal", function() {
                 dialog.remove();
@@ -719,6 +725,56 @@
                     }
                     console.log(
                         "ERROR POSTING NEW GAME:" + xhr + status + error
+                    );
+                }
+            });
+        },
+        addPlayer: function(gameId, playerId, $select) {
+            $.ajax({
+                url:
+                    fbc.base.parameters.server +
+                    "API/games/" +
+                    gameId +
+                    "/add_player/",
+                method: "POST",
+                contentType: "application/json",
+                headers: {
+                    Authorization: "Token " + fbc.base.parameters.token
+                },
+                data: JSON.stringify({
+                    id: playerId
+                }),
+                beforeSend: function() {
+                    $select.addClass("disabled");
+                    $select.prop("disabled", true);
+                },
+                complete: function(xhr, status) {
+                    $select.removeClass("disabled");
+                    $select.prop("disabled", false);
+                },
+                success: function(data) {
+                    $select.data('value', playerId);
+                    var $msg = $('<p>', {
+                        style: {
+                            color: 'green'
+                        },
+                        text: fbc.players.dict[playerId].name + ' added'
+                    });
+                    $select.after($msg);
+                    fbc.base.hideElementAfter($msg, 3000);
+                },
+                error: function(xhr, status, error) {
+                    if ($.isFunction(errorCallback)) {
+                        errorCallback(xhr, status, error);
+                    }
+                    console.log(
+                        "ERROR ADDING PLAYER to game " +
+                            gameId +
+                            ",player:" +
+                            playerId +
+                            xhr +
+                            status +
+                            error
                     );
                 }
             });
