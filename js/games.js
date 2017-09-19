@@ -463,80 +463,87 @@
 
             for (var i = 0; i < game.players.length; i++) {
                 gameInfo.append(
-                    $("<select>", {
-                        class: "form-control",
-                        "data-form-key": "player"
-                    })
+                    fbc.games.getPlayerSelect(players, game.players[i].id)
                 );
             }
 
             if (game.players.length < fbc.base.parameters.maxPlayers) {
-                gameInfo.append(
-                    $("<select>", {
-                        class: "form-control",
-                        "data-form-key": "player"
-                    })
-                );
+                gameInfo.append(fbc.games.getPlayerSelect(players));
             }
 
-            var $playerSelects = dialog.find('select[data-form-key="player"]');
-
-            $playerSelects.append(
-                $("<option>", {
-                    value: "",
-                    text: ""
-                })
+            fbc.base.disableValuesFromOtherSelects(
+                dialog.find('select[data-form-key="player"]')
             );
-
-            for (var i = 0; i < players.length; i++) {
-                $playerSelects.append(
-                    $("<option>", {
-                        value: players[i].id,
-                        text: players[i].name + " (" + players[i].score + ")"
-                    })
-                );
-            }
-
-            for (var i = 0; i < game.players.length; i++) {
-                var $elem = $playerSelects.eq(i);
-                $elem.val(game.players[i].id);
-                $elem.data("value", game.players[i].id);
-            }
-
-            fbc.base.disableValuesFromOtherSelects($playerSelects);
 
             dialog.on("change", 'select[data-form-key="player"]', function(e) {
                 var $target = $(e.currentTarget);
 
-                var $emptySelections = $playerSelects.filter(function() {
-                    return $(this).val() === "";
-                });
+                var newValue = $target.val();
+                var oldValue = $target.data("value");
 
-                if ($target.val() === "") {
-                    // player selection was removed
+                var successCallback = function() {
+                    var $playerSelects = dialog.find(
+                        'select[data-form-key="player"]'
+                    );
 
-                    // remove other empty selections
-                    var $otherEmptySelections = $emptySelections.not($target);
-                    $otherEmptySelections.remove();
-                    $playerSelects = $playerSelects.not($otherEmptySelections);
+                    var $emptySelections = $playerSelects.filter(function() {
+                        return $(this).val() === "";
+                    });
 
-                    // move the current target to last
-                    gameInfo.append($target);
-                } else {
-                    // player selection was added
                     if (
                         $emptySelections.length === 0 &&
                         $playerSelects.length < fbc.base.parameters.maxPlayers
                     ) {
-                        var $newSelect = $target.clone();
-                        $newSelect.val("");
+                        gameInfo.append(fbc.games.getPlayerSelect(players));
+                    }
 
-                        $playerSelects = $playerSelects.add($newSelect);
-                        gameInfo.append($newSelect);
+                    fbc.base.disableValuesFromOtherSelects($playerSelects);
+                };
+
+                if (game.new) {
+                    successCallback();
+                } else {
+                    if (newValue === "") {
+                        if (oldValue !== "") {
+                            // player was removed
+                            fbc.games.playerChange(
+                                game.id,
+                                oldValue,
+                                $target,
+                                "remove",
+                                successCallback
+                            );
+                        }
+                    } else {
+                        if (oldValue === "") {
+                            // player was added
+                            fbc.games.playerChange(
+                                game.id,
+                                newValue,
+                                $target,
+                                "add",
+                                successCallback
+                            );
+                        } else {
+                            // player was changed
+                            fbc.games.playerChange(
+                                game.id,
+                                oldValue,
+                                $target,
+                                "remove",
+                                function() {
+                                    fbc.games.playerChange(
+                                        game.id,
+                                        newValue,
+                                        $target,
+                                        "add",
+                                        successCallback
+                                    );
+                                }
+                            );
+                        }
                     }
                 }
-
-                fbc.base.disableValuesFromOtherSelects($playerSelects);
             });
 
             $("body").append(dialog);
@@ -729,13 +736,39 @@
                 }
             });
         },
-        addPlayer: function(gameId, playerId, $select) {
+        playerChange: function(
+            gameId,
+            playerId,
+            $select,
+            method,
+            successCallback
+        ) {
+            var errorMessage = ""; // TODO: ADD ERROR MESSAGES
+            var successMessage = "";
+            var messageColor = "";
+            var successValue = null;
+
+            switch (method) {
+                case "add":
+                    successMessage = " added";
+                    messageColor = "green";
+                    successValue = playerId;
+                    break;
+                case "remove":
+                    successMessage = " removed";
+                    messageColor = "red";
+                    successValue = "";
+                    break;
+            }
+
             $.ajax({
                 url:
                     fbc.base.parameters.server +
                     "API/games/" +
                     gameId +
-                    "/add_player/",
+                    "/" +
+                    method +
+                    "_player/",
                 method: "POST",
                 contentType: "application/json",
                 headers: {
@@ -753,22 +786,32 @@
                     $select.prop("disabled", false);
                 },
                 success: function(data) {
-                    $select.data('value', playerId);
-                    var $msg = $('<p>', {
+                    $select.data("value", successValue);
+                    var $msg = $("<p>", {
                         style: {
-                            color: 'green'
+                            color: messageColor
                         },
-                        text: fbc.players.dict[playerId].name + ' added'
+                        text: fbc.players.dict[playerId].name + successMessage
                     });
                     $select.after($msg);
                     fbc.base.hideElementAfter($msg, 3000);
+
+                    if(method === 'remove') {
+                        $select.remove();
+                        return;
+                    }
+
+                    if ($.isFunction(successCallback)) {
+                        successCallback();
+                    }
                 },
                 error: function(xhr, status, error) {
-                    if ($.isFunction(errorCallback)) {
-                        errorCallback(xhr, status, error);
-                    }
+                    $select.val($select.data("value"));
+
                     console.log(
-                        "ERROR ADDING PLAYER to game " +
+                        "ERROR " +
+                            successMessage +
+                            " PLAYER to game " +
                             gameId +
                             ",player:" +
                             playerId +
@@ -818,6 +861,30 @@
                     );
                 }
             });
+        },
+        getPlayerSelect: function(players, value) {
+            var $select = $("<select>", {
+                class: "form-control",
+                "data-form-key": "player",
+                html: $("<option>", {
+                    value: "",
+                    text: ""
+                })
+            });
+
+            $select.append(
+                $.map(players, function(player) {
+                    return $("<option>", {
+                        value: player.id,
+                        text: player.name + " (" + player.score + ")"
+                    });
+                })
+            );
+
+            $select.val(value !== undefined ? value : "");
+            $select.data("value", $select.val());
+
+            return $select;
         },
         openEnterResultDialog: function($elem) {
             var gameId = $elem.data("gameId");
