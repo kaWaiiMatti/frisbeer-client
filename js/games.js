@@ -489,7 +489,10 @@
                         $emptySelections.length === 0 &&
                         $playerSelects.length < fbc.base.parameters.maxPlayers
                     ) {
-                        gameInfo.append(fbc.games.getPlayerSelect(players));
+                        gameInfo
+                            .children('select[data-form-key="player"]')
+                            .last()
+                            .after(fbc.games.getPlayerSelect(players));
                     }
 
                     fbc.base.disableValuesFromOtherSelects($playerSelects);
@@ -693,15 +696,19 @@
             });
         },
         playerChange: function(gameId, $select, successCallback) {
-            var errorMessage = ""; // TODO: ADD ERROR MESSAGES
-            var successMessage = "";
             var messageColor = "";
             var successValue = null;
 
-            var newValue = $target.val();
-            var oldValue = $target.data("value");
+            var newValue = $select.val();
+            var oldValue = $select.data("value");
 
             var method = oldValue === "" ? "add" : "remove";
+
+            var errorMessage =
+                "Error " +
+                (method === "add" ? "adding" : "removing") +
+                " player!";
+            var successMessage = "";
 
             var playerId = method === "add" ? newValue : oldValue;
 
@@ -743,19 +750,29 @@
                     $select.prop("disabled", false);
                 },
                 success: function(data) {
-                    $select.data("value", successValue);
                     var $msg = $("<p>", {
-                        style: {
+                        css: {
                             color: messageColor
                         },
                         text: fbc.players.dict[playerId].name + successMessage
                     });
-                    $select.after($msg);
+
+                    $select.parent().append($msg);
                     fbc.base.hideElementAfter($msg, 3000);
 
+                    $select.data("value", successValue);
+
                     if (method === "remove") {
-                        $select.remove();
-                        return;
+                        if (newValue === "") {
+                            $select.remove();
+                        } else {
+                            fbc.games.playerChange(
+                                gameId,
+                                $select,
+                                successCallback
+                            );
+                            return;
+                        }
                     }
 
                     if ($.isFunction(successCallback)) {
