@@ -55,6 +55,81 @@
                 .first()
                 .html(
                     $.map(games, function(elem) {
+                        var buttons = [];
+
+                        if (
+                            elem.state === 0 &&
+                            elem.players.length === 0
+                        ) {
+                            buttons.push(
+                                $("<input>", {
+                                    "data-logged-in": "true",
+                                    type: "button",
+                                    class: "btn btn-primary",
+                                    value: "Remove game",
+                                    click: function() {
+                                        fbc.games.confirmRemoveGame(elem);
+                                    }
+                                })
+                            );
+                        }
+
+                        if (
+                            elem.state === 0 &&
+                            elem.players.length ===
+                                fbc.base.parameters.maxPlayers
+                        ) {
+                            buttons.push(
+                                $("<input>", {
+                                    "data-logged-in": "true",
+                                    type: "button",
+                                    class: "btn btn-primary",
+                                    value: "Form teams",
+                                    click: function() {
+                                        fbc.games.confirmFormTeams(elem.id);
+                                    }
+                                })
+                            );
+                        }
+
+                        if (elem.state === 0) {
+                            buttons.push(
+                                $("<input>", {
+                                    "data-logged-in": "true",
+                                    type: "button",
+                                    class: "btn btn-primary",
+                                    value: "Edit game",
+                                    click: function() {
+                                        fbc.games.openGameDialog(elem);
+                                    }
+                                })
+                            );
+                        }
+
+                        if (elem.state === 1) {
+                            buttons.push(
+                                $("<input>", {
+                                    type: "button",
+                                    class: "btn btn-primary",
+                                    value: "Deform teams",
+                                    click: function() {
+                                        fbc.games.confirmDeformTeams(elem.id);
+                                    }
+                                })
+                            );
+
+                            buttons.push(
+                                $("<input>", {
+                                    type: "button",
+                                    class: "btn btn-primary",
+                                    value: "Enter result",
+                                    click: function() {
+                                        // TODO: OPEN ENTER RESULT DIALOG
+                                    }
+                                })
+                            );
+                        }
+
                         return $("<tr>", {
                             html: [
                                 $("<td>", {
@@ -73,46 +148,7 @@
                                     text: fbc.games.getStatusText(elem)
                                 }),
                                 $("<td>", {
-                                    html: [
-                                        elem.state === 0 &&
-                                        elem.players.length ===
-                                            fbc.base.parameters.maxPlayers
-                                            ? $("<input>", {
-                                                  "data-logged-in": "true",
-                                                  type: "button",
-                                                  class: "btn btn-primary",
-                                                  value: "Form teams",
-                                                  click: function() {
-                                                      fbc.games.confirmFormTeams(
-                                                          elem.id
-                                                      );
-                                                  }
-                                              })
-                                            : null,
-                                        elem.state === 0
-                                            ? $("<input>", {
-                                                  "data-logged-in": "true",
-                                                  type: "button",
-                                                  class: "btn btn-primary",
-                                                  value: "Edit game",
-                                                  click: function() {
-                                                      fbc.games.openGameDialog(
-                                                          elem
-                                                      );
-                                                  }
-                                              })
-                                            : null,
-                                        elem.state === 1
-                                            ? $("<input>", {
-                                                  type: "button",
-                                                  class: "btn btn-primary",
-                                                  value: "Enter result",
-                                                  click: function() {
-                                                      // TODO: OPEN ENTER RESULT DIALOG
-                                                  }
-                                              })
-                                            : null
-                                    ]
+                                    html: buttons
                                 })
                             ]
                         });
@@ -519,113 +555,94 @@
             });
         },
         confirmFormTeams: function(gameId) {
-            var dialog = $("<div>", {
-                id: "formTeamsModal",
-                class: "modal fade",
-                html: $("<div>", {
-                    class: "modal-dialog",
-                    html: $("<div>", {
-                        class: "modal-content",
-                        html: [
-                            $("<div>", {
-                                class: "modal-header",
-                                html: [
-                                    $("<button>", {
-                                        type: "button",
-                                        class: "close",
-                                        "data-dismiss": "modal",
-                                        html: "&times;"
-                                    }),
-                                    $("<h4>", {
-                                        class: "modal-title",
-                                        text: "Form teams"
-                                    })
-                                ]
-                            }),
-                            $("<div>", {
-                                class: "modal-body",
-                                html: [
-                                    $("<div>", {
-                                        html: [
-                                            $("<p>", {
-                                                text: "Players:"
-                                            }),
-                                            $("<ul>", {
-                                                html: $.map(
-                                                    fbc.games.dict[gameId]
-                                                        .players,
-                                                    function(player) {
-                                                        return $("<li>", {
-                                                            text: player.name
-                                                        });
-                                                    }
-                                                )
-                                            })
-                                        ]
-                                    })
-                                ]
-                            }),
-                            $("<div>", {
-                                class: "modal-footer",
-                                html: [
-                                    $("<div>", {
-                                        html: [
-                                            $("<button>", {
-                                                type: "button",
-                                                class:
-                                                    "btn btn-primary float-right",
-                                                text: "Form",
-                                                click: function() {
-                                                    var $btn = $(this);
-                                                    $btn.addClass("disabled");
-                                                    $btn.prop("disabled", true);
-
-                                                    var $modal = $btn.closest(
-                                                        ".modal"
-                                                    );
-
-                                                    fbc.games.patchState(
-                                                        gameId,
-                                                        1,
-                                                        function() {
-                                                            $modal.modal(
-                                                                "hide"
-                                                            );
-                                                        },
-                                                        function() {
-                                                            $btn.removeClass(
-                                                                "disabled"
-                                                            );
-
-                                                            $btn.prop(
-                                                                "disabled",
-                                                                false
-                                                            );
-                                                        }
-                                                    );
-                                                }
-                                            }),
-                                            $("<button>", {
-                                                type: "button",
-                                                class:
-                                                    "btn btn-danger float-right",
-                                                "data-dismiss": "modal",
-                                                text: "Cancel"
-                                            })
-                                        ]
-                                    })
-                                ]
-                            })
-                        ]
+            fbc.base.showDialog({
+                header: "Form teams",
+                body: [
+                    $("<p>", {
+                        text: "Players:"
+                    }),
+                    $("<ul>", {
+                        html: $.map(fbc.games.dict[gameId].players, function(
+                            player
+                        ) {
+                            return $("<li>", {
+                                text: player.name
+                            });
+                        })
                     })
-                })
+                ],
+                buttons: [
+                    $("<button>", {
+                        type: "button",
+                        class: "btn btn-primary float-right",
+                        text: "Form",
+                        click: function() {
+                            var $btn = $(this);
+                            $btn.addClass("disabled");
+                            $btn.prop("disabled", true);
+
+                            var $modal = $btn.closest(".modal");
+
+                            fbc.games.patchState(
+                                gameId,
+                                1,
+                                function() {
+                                    $modal.modal("hide");
+                                },
+                                function() {
+                                    $btn.removeClass("disabled");
+
+                                    $btn.prop("disabled", false);
+                                }
+                            );
+                        }
+                    }),
+                    $("<button>", {
+                        type: "button",
+                        class: "btn btn-danger float-right",
+                        "data-dismiss": "modal",
+                        text: "Cancel"
+                    })
+                ]
             });
+        },
+        confirmDeformTeams: function(gameId) {
+            fbc.base.showDialog({
+                header: "Deform teams",
+                body: fbc.games.getPlayerNames(fbc.games.dict[gameId]),
+                buttons: [
+                    $("<button>", {
+                        type: "button",
+                        class: "btn btn-primary float-right",
+                        text: "Deform",
+                        click: function() {
+                            var $btn = $(this);
+                            $btn.addClass("disabled");
+                            $btn.prop("disabled", true);
 
-            $("body").append(dialog);
-            dialog.modal();
+                            var $modal = $btn.closest(".modal");
 
-            dialog.one("hidden.bs.modal", function() {
-                dialog.remove();
+                            fbc.games.patchState(
+                                gameId,
+                                0,
+                                function() {
+                                    $modal.modal("hide");
+                                },
+                                function() {
+                                    $btn.removeClass("disabled");
+
+                                    $btn.prop("disabled", false);
+                                }
+                            );
+                        }
+                    }),
+                    $("<button>", {
+                        type: "button",
+                        class: "btn btn-danger float-right",
+                        "data-dismiss": "modal",
+                        text: "Cancel"
+                    })
+                ]
             });
         },
         gatherGameInfo: function($element) {
@@ -672,12 +689,6 @@
                     Authorization: "Token " + fbc.base.parameters.token
                 },
                 data: JSON.stringify(data),
-                beforeSend: function() {
-                    // TODO: do something
-                },
-                complete: function(xhr, status) {
-                    // TODO: do something
-                },
                 success: function(data) {
                     fbc.games.update(fbc.games.updateTable);
 
@@ -692,6 +703,75 @@
                     console.log(
                         "ERROR POSTING NEW GAME:" + xhr + status + error
                     );
+                }
+            });
+        },
+        confirmRemoveGame: function(game) {
+            fbc.base.showDialog({
+                header: "Remove game",
+                body: [
+                    $("<p>", {
+                        text: "GameId: " + game.id
+                    }),
+                    $("<p>", {
+                        text: "Name: " + game.name
+                    }),
+                    $("<p>", {
+                        text:
+                            "Location: " + (game.location_repr !== null
+                            ? game.location_repr.name
+                            : "")
+                    }),
+                    $("<p>", {
+                        text: "Date: " + (game.date !== null ? new Date(game.date).toLocaleString() : '')
+                    })
+                ],
+                buttons: [
+                    $("<button>", {
+                        type: "button",
+                        class: "btn btn-primary float-right",
+                        text: "Remove",
+                        click: function() {
+                            var $btn = $(this);
+                            $btn.addClass("disabled");
+                            $btn.prop("disabled", true);
+
+                            var $modal = $btn.closest(".modal");
+
+                            fbc.games.removeGame(game.id, null, function() {
+                                $btn.removeClass("disabled");
+                                $btn.prop("disabled", false);
+                            });
+                        }
+                    }),
+                    $("<button>", {
+                        type: "button",
+                        class: "btn btn-danger float-right",
+                        "data-dismiss": "modal",
+                        text: "Cancel"
+                    })
+                ]
+            });
+        },
+        removeGame: function(gameId, successCallback, errorCallback) {
+            $.ajax({
+                url: fbc.base.parameters.server + "API/games/" + gameId + "/",
+                method: "DELETE",
+                headers: {
+                    Authorization: "Token " + fbc.base.parameters.token
+                },
+                success: function(data) {
+                    delete fbc.games.dict[gameId];
+                    fbc.games.updateTable();
+
+                    if ($.isFunction(successCallback)) {
+                        successCallback(data);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    if ($.isFunction(errorCallback)) {
+                        errorCallback(xhr, status, error);
+                    }
                 }
             });
         },

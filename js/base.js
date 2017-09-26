@@ -379,6 +379,72 @@ $(document).ready(function() {
             }
         },
 
+        showDialog: function(options) {
+            options = options || {};
+
+            if (!options.hasOwnProperty("header")) {
+                options.header = "";
+            }
+
+            if (!options.hasOwnProperty("body")) {
+                options.body = [];
+            }
+
+            if (!options.hasOwnProperty("buttons")) {
+                options.buttons = [];
+            }
+
+            var dialog = $("<div>", {
+                class: "modal fade",
+                html: $("<div>", {
+                    class: "modal-dialog",
+                    html: $("<div>", {
+                        class: "modal-content",
+                        html: [
+                            $("<div>", {
+                                class: "modal-header",
+                                html: [
+                                    $("<button>", {
+                                        type: "button",
+                                        class: "close",
+                                        "data-dismiss": "modal",
+                                        html: "&times;"
+                                    }),
+                                    $("<h4>", {
+                                        class: "modal-title",
+                                        text: options.header
+                                    })
+                                ]
+                            }),
+                            $("<div>", {
+                                class: "modal-body",
+                                html: [
+                                    $("<div>", {
+                                        html: options.body
+                                    })
+                                ]
+                            }),
+                            $("<div>", {
+                                class: "modal-footer",
+                                html: [
+                                    $("<div>", {
+                                        html: options.buttons
+                                    })
+                                ]
+                            })
+                        ]
+                    })
+                })
+            });
+
+            $("body").append(dialog);
+            dialog.modal();
+
+            dialog.one("hidden.bs.modal", function() {
+                dialog.remove();
+            });
+        },
+
         sorting: {
             score: function(a, b) {
                 return a.score - b.score;
