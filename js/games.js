@@ -257,9 +257,7 @@
         },
         openGameDialog: function(game) {
             game = game || {};
-            if (!game.hasOwnProperty("id")) {
-                game["new"] = true;
-            }
+            game.new = !game.hasOwnProperty("id");
 
             var players = fbc.players.getList();
 
