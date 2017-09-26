@@ -10,26 +10,26 @@
             return locations;
         },
         initialize: function() {
-            console.log("initializing locations...");
+            console.log('initializing locations...');
 
-            $("#add-new-location").click(fbc.locations.openNewDialog);
+            $('#add-new-location').click(fbc.locations.openNewDialog);
 
-            $("#refresh-locations").click(function() {
+            $('#refresh-locations').click(function() {
                 fbc.locations.update(fbc.locations.updateTable);
             });
 
-            $("#refresh-locations").click();
+            $('#refresh-locations').click();
         },
         update: function(successCallback, errorCallback) {
             ///<summary>Update fbc.locations.dict from server</summary>
             $.ajax({
-                url: fbc.base.parameters.server + "API/locations/",
-                method: "GET",
+                url: fbc.base.parameters.server + 'API/locations/',
+                method: 'GET',
                 beforeSend: function() {
-                    fbc.base.loader.set("locations");
+                    fbc.base.loader.set('locations');
                 },
                 complete: function() {
-                    fbc.base.loader.remove("locations");
+                    fbc.base.loader.remove('locations');
                 },
                 success: function(data) {
                     locationObject = {};
@@ -55,25 +55,25 @@
 
             locations.sort(fbc.base.sorting.name);
 
-            $("#locations-table")
-                .children("tbody")
+            $('#locations-table')
+                .children('tbody')
                 .first()
                 .html(
                     $.map(locations, function(elem) {
-                        return $("<tr>", {
+                        return $('<tr>', {
                             html: [
-                                $("<td>", {
+                                $('<td>', {
                                     text: elem.name
                                 }),
-                                $("<td>", {
+                                $('<td>', {
                                     text:
                                         elem.latitude.length > 0 &&
                                         elem.longitude.length > 0
-                                            ? "lat:" +
+                                            ? 'lat:' +
                                               elem.latitude +
-                                              " long:" +
+                                              ' long:' +
                                               elem.longitude
-                                            : ""
+                                            : ''
                                 })
                             ]
                         });
@@ -81,78 +81,78 @@
                 );
         },
         openNewDialog: function() {
-            var dialog = $("<div>", {
-                class: "modal fade",
-                html: $("<div>", {
-                    class: "modal-dialog",
-                    html: $("<div>", {
-                        class: "modal-content",
+            var dialog = $('<div>', {
+                class: 'modal fade',
+                html: $('<div>', {
+                    class: 'modal-dialog',
+                    html: $('<div>', {
+                        class: 'modal-content',
                         html: [
-                            $("<div>", {
-                                class: "modal-header",
+                            $('<div>', {
+                                class: 'modal-header',
                                 html: [
-                                    $("<button>", {
-                                        type: "button",
-                                        class: "close",
-                                        "data-dismiss": "modal",
-                                        html: "&times;"
+                                    $('<button>', {
+                                        type: 'button',
+                                        class: 'close',
+                                        'data-dismiss': 'modal',
+                                        html: '&times;'
                                     }),
-                                    $("<h4>", {
-                                        class: "modal-title",
-                                        text: "Add new location"
+                                    $('<h4>', {
+                                        class: 'modal-title',
+                                        text: 'Add new location'
                                     })
                                 ]
                             }),
-                            $("<div>", {
-                                class: "modal-body",
+                            $('<div>', {
+                                class: 'modal-body',
                                 html: [
-                                    $("<form>", {
+                                    $('<form>', {
                                         html: [
-                                            $("<div>", {
-                                                class: "form-group",
+                                            $('<div>', {
+                                                class: 'form-group',
                                                 html: [
-                                                    $("<label>", {
-                                                        for: "newLocationName",
-                                                        text: "Name"
+                                                    $('<label>', {
+                                                        for: 'newLocationName',
+                                                        text: 'Name'
                                                     }),
-                                                    $("<input>", {
-                                                        id: "newLocationName",
-                                                        class: "form-control",
-                                                        name: "newLocation",
-                                                        "data-form-key": "name"
+                                                    $('<input>', {
+                                                        id: 'newLocationName',
+                                                        class: 'form-control',
+                                                        name: 'newLocation',
+                                                        'data-form-key': 'name'
                                                     }),
-                                                    $("<label>", {
+                                                    $('<label>', {
                                                         for:
-                                                            "newLocationLatitude",
-                                                        text: "Latitude"
+                                                            'newLocationLatitude',
+                                                        text: 'Latitude'
                                                     }),
-                                                    $("<input>", {
+                                                    $('<input>', {
                                                         id:
-                                                            "newLocationLatitude",
-                                                        class: "form-control",
-                                                        name: "newLocation",
-                                                        type: "number",
+                                                            'newLocationLatitude',
+                                                        class: 'form-control',
+                                                        name: 'newLocation',
+                                                        type: 'number',
                                                         step: 0.00001,
-                                                        "data-form-key":
-                                                            "latitude"
+                                                        'data-form-key':
+                                                            'latitude'
                                                     }),
-                                                    $("<label>", {
+                                                    $('<label>', {
                                                         for:
-                                                            "newLocationLongitude",
-                                                        text: "Longitude"
+                                                            'newLocationLongitude',
+                                                        text: 'Longitude'
                                                     }),
-                                                    $("<input>", {
+                                                    $('<input>', {
                                                         id:
-                                                            "newLocationLongitude",
-                                                        class: "form-control",
-                                                        name: "newLocation",
-                                                        type: "number",
+                                                            'newLocationLongitude',
+                                                        class: 'form-control',
+                                                        name: 'newLocation',
+                                                        type: 'number',
                                                         step: 0.00001,
-                                                        "data-form-key":
-                                                            "longitude"
+                                                        'data-form-key':
+                                                            'longitude'
                                                     }),
-                                                    $("<p>", {
-                                                        class: "help-block"
+                                                    $('<p>', {
+                                                        class: 'help-block'
                                                     })
                                                 ]
                                             })
@@ -160,17 +160,17 @@
                                     })
                                 ]
                             }),
-                            $("<div>", {
-                                class: "modal-footer",
+                            $('<div>', {
+                                class: 'modal-footer',
                                 html: [
-                                    $("<button>", {
-                                        type: "button",
-                                        class: "btn btn-primary float-right",
-                                        text: "Add",
+                                    $('<button>', {
+                                        type: 'button',
+                                        class: 'btn btn-primary float-right',
+                                        text: 'Add',
                                         click: function() {
                                             // TODO: VALIDATE NAME NOT EMPTY
                                             var $modal = $(this).closest(
-                                                ".modal"
+                                                '.modal'
                                             );
 
                                             var data = {};
@@ -178,24 +178,24 @@
                                                 'form input[name="newLocation"]'
                                             ).each(function() {
                                                 data[
-                                                    $(this).data("formKey")
+                                                    $(this).data('formKey')
                                                 ] = $(this).val();
                                             });
                                             fbc.locations.postNew(
                                                 data,
                                                 function() {
-                                                    $modal.modal("hide");
+                                                    $modal.modal('hide');
                                                 },
                                                 function() {
                                                     // FAIL
-                                                    var error = $("<p>", {
+                                                    var error = $('<p>', {
                                                         class:
-                                                            "modal-help bg-danger", // TODO: COME UP WITH BETTER THAN BG DANGER?
+                                                            'modal-help bg-danger', // TODO: COME UP WITH BETTER THAN BG DANGER?
                                                         text:
-                                                            "Error adding new location!"
+                                                            'Error adding new location!'
                                                     });
                                                     $modal
-                                                        .find(".modal-body")
+                                                        .find('.modal-body')
                                                         .append(error);
                                                     setTimeout(function() {
                                                         error.fadeOut(
@@ -211,11 +211,11 @@
                                             );
                                         }
                                     }),
-                                    $("<button>", {
-                                        type: "button",
-                                        class: "btn btn-danger float-right",
-                                        "data-dismiss": "modal",
-                                        text: "Cancel"
+                                    $('<button>', {
+                                        type: 'button',
+                                        class: 'btn btn-danger float-right',
+                                        'data-dismiss': 'modal',
+                                        text: 'Cancel'
                                     })
                                 ]
                             })
@@ -224,20 +224,20 @@
                 })
             });
 
-            $("body").append(dialog);
+            $('body').append(dialog);
             dialog.modal();
 
-            dialog.one("hidden.bs.modal", function() {
+            dialog.one('hidden.bs.modal', function() {
                 dialog.remove();
             });
         },
         postNew: function(param, successCallback, errorCallback) {
             $.ajax({
-                url: fbc.base.parameters.server + "API/locations/",
-                method: "POST",
-                contentType: "application/json",
+                url: fbc.base.parameters.server + 'API/locations/',
+                method: 'POST',
+                contentType: 'application/json',
                 headers: {
-                    Authorization: "Token " + fbc.base.parameters.token
+                    Authorization: 'Token ' + fbc.base.parameters.token
                 },
                 data: JSON.stringify(param),
                 beforeSend: function() {
@@ -257,7 +257,7 @@
                         errorCallback(xhr, status, error);
                     }
                     console.log(
-                        "ERROR POSTING NEW LOCATION:" + xhr + status + error
+                        'ERROR POSTING NEW LOCATION:' + xhr + status + error
                     );
                 }
             });

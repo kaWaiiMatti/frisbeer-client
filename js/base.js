@@ -3,10 +3,10 @@ var fbc = {};
 $(document).ready(function() {
     $.each(fbc, function() {
         if (
-            this.hasOwnProperty("initialize") &&
-            $.isFunction(this["initialize"])
+            this.hasOwnProperty('initialize') &&
+            $.isFunction(this['initialize'])
         ) {
-            this["initialize"]();
+            this['initialize']();
         }
     });
 });
@@ -14,16 +14,16 @@ $(document).ready(function() {
 (function(fbc) {
     fbc.base = {
         parameters: {
-            server: "https://t3mu.kapsi.fi/frisbeer/",
-            token: "",
+            server: 'https://t3mu.kapsi.fi/frisbeer/',
+            token: '',
             maxPlayers: 6
         },
 
         initialize: function() {
             ///<summary>Common initializations</summary>
-            console.log("initializing base...");
+            console.log('initializing base...');
 
-            $(".container-fluid")
+            $('.container-fluid')
                 .children()
                 .hide();
 
@@ -31,9 +31,9 @@ $(document).ready(function() {
             $('[data-toggle-menu="true"]').click(fbc.base.menu.toggle);
             $('[data-close-menu="true"]').click(fbc.base.menu.close);
 
-            $(".side-menu > ul.menu-items").on(
-                "click",
-                "li > a",
+            $('.side-menu > ul.menu-items').on(
+                'click',
+                'li > a',
                 null,
                 fbc.base.menu.click
             );
@@ -44,16 +44,16 @@ $(document).ready(function() {
 
             // Show tab based on url param or first as default
             if (
-                params.hasOwnProperty("tab") &&
-                $(".side-menu > ul.menu-items > li").find(
-                    'a[data-target-tab="' + params["tab"] + '"]'
+                params.hasOwnProperty('tab') &&
+                $('.side-menu > ul.menu-items > li').find(
+                    'a[data-target-tab="' + params['tab'] + '"]'
                 ).length > 0
             ) {
-                $(".side-menu > ul.menu-items > li")
-                    .find('a[data-target-tab="' + params["tab"] + '"]')
+                $('.side-menu > ul.menu-items > li')
+                    .find('a[data-target-tab="' + params['tab'] + '"]')
                     .click();
             } else {
-                $(".side-menu > ul.menu-items > li > a")
+                $('.side-menu > ul.menu-items > li > a')
                     .first()
                     .click();
             }
@@ -61,31 +61,31 @@ $(document).ready(function() {
 
         menu: {
             open: function() {
-                $(".side-menu").addClass("open");
+                $('.side-menu').addClass('open');
             },
             close: function() {
-                $(".side-menu").removeClass("open");
+                $('.side-menu').removeClass('open');
             },
             toggle: function() {
-                $(".side-menu").toggleClass("open");
+                $('.side-menu').toggleClass('open');
             },
             click: function(e) {
                 var targetTabData = $(e.target).data();
-                if (targetTabData.hasOwnProperty("targetTab")) {
-                    var targetTab = targetTabData["targetTab"];
+                if (targetTabData.hasOwnProperty('targetTab')) {
+                    var targetTab = targetTabData['targetTab'];
                     switch (targetTab) {
-                        case "login":
+                        case 'login':
                             fbc.base.login.openDialog();
                             break;
-                        case "logout":
+                        case 'logout':
                             fbc.base.logout.openConfirmDialog();
                             break;
                         default:
-                            $(".container-fluid")
+                            $('.container-fluid')
                                 .children()
                                 .hide();
-                            var $target = $(".container-fluid").children(
-                                "#" + targetTab
+                            var $target = $('.container-fluid').children(
+                                '#' + targetTab
                             );
                             fbc.base.query.updateUrl({ tab: targetTab });
                             $target.show();
@@ -100,29 +100,29 @@ $(document).ready(function() {
             set: function(cname, cvalue, exdays) {
                 var d = new Date();
                 d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000);
-                var expires = "expires=" + d.toUTCString();
-                document.cookie = cname + "=" + cvalue + "; " + expires;
+                var expires = 'expires=' + d.toUTCString();
+                document.cookie = cname + '=' + cvalue + '; ' + expires;
             },
             get: function(cname) {
-                var name = cname + "=";
-                var ca = document.cookie.split(";");
+                var name = cname + '=';
+                var ca = document.cookie.split(';');
                 for (var i = 0; i < ca.length; i++) {
                     var c = ca[i];
-                    while (c.charAt(0) == " ") {
+                    while (c.charAt(0) == ' ') {
                         c = c.substring(1);
                     }
                     if (c.indexOf(name) == 0) {
                         return c.substring(name.length, c.length);
                     }
                 }
-                return "";
+                return '';
             }
         },
 
         login: {
             checkExisting: function() {
                 ///<summary></summary>
-                var auth_token = fbc.base.cookies.get("token");
+                var auth_token = fbc.base.cookies.get('token');
                 if (auth_token !== null && auth_token.length > 0) {
                     fbc.base.parameters.token = auth_token;
                     fbc.base.login.success();
@@ -131,8 +131,8 @@ $(document).ready(function() {
                 }
             },
             perform: function() {
-                var username = $("#username").val();
-                var password = $("#password").val();
+                var username = $('#username').val();
+                var password = $('#password').val();
 
                 var usernameRegex = /^[a-zA-Z0-9@.+_\-]+$/;
 
@@ -141,16 +141,16 @@ $(document).ready(function() {
                     username !== username.match(usernameRegex)[0]
                 ) {
                     fbc.base.login.showMessage(
-                        "Username contains invalid characters!"
+                        'Username contains invalid characters!'
                     );
                     return;
                 }
 
-                fbc.base.login.showMessage("");
+                fbc.base.login.showMessage('');
 
                 $.ajax({
-                    url: fbc.base.parameters.server + "API/token-auth/",
-                    method: "POST",
+                    url: fbc.base.parameters.server + 'API/token-auth/',
+                    method: 'POST',
                     data: {
                         username: username,
                         password: password
@@ -164,23 +164,23 @@ $(document).ready(function() {
                     success: function(data) {
                         fbc.base.parameters.token = data.token;
                         fbc.base.cookies.set(
-                            "token",
+                            'token',
                             fbc.base.parameters.token,
                             1
                         );
                         fbc.base.login.success();
                     },
                     error: function() {
-                        fbc.base.login.showMessage("Failed to login!");
+                        fbc.base.login.showMessage('Failed to login!');
                     }
                 });
             },
             showMessage: function(message) {
-                var $body = $("#password").closest(".modal-body");
-                var $elem = $("<p>", {
+                var $body = $('#password').closest('.modal-body');
+                var $elem = $('<p>', {
                     text: message
                 });
-                $body.children("p").remove();
+                $body.children('p').remove();
                 $body.append($elem);
                 setTimeout(function() {
                     $elem.fadeOut(500, function() {
@@ -192,62 +192,62 @@ $(document).ready(function() {
                 $('[data-logged-in="false"]').hide();
                 $('[data-logged-in="true"]').show();
 
-                $("#password")
-                    .closest(".modal")
-                    .modal("hide");
+                $('#password')
+                    .closest('.modal')
+                    .modal('hide');
             },
             openDialog: function() {
-                var dialog = $("<div>", {
-                    class: "modal fade",
-                    html: $("<div>", {
-                        class: "modal-dialog",
-                        html: $("<div>", {
-                            class: "modal-content",
+                var dialog = $('<div>', {
+                    class: 'modal fade',
+                    html: $('<div>', {
+                        class: 'modal-dialog',
+                        html: $('<div>', {
+                            class: 'modal-content',
                             html: [
-                                $("<div>", {
-                                    class: "modal-header",
+                                $('<div>', {
+                                    class: 'modal-header',
                                     html: [
-                                        $("<button>", {
-                                            type: "button",
-                                            class: "close",
-                                            "data-dismiss": "modal",
-                                            html: "&times;"
+                                        $('<button>', {
+                                            type: 'button',
+                                            class: 'close',
+                                            'data-dismiss': 'modal',
+                                            html: '&times;'
                                         }),
-                                        $("<h4>", {
-                                            class: "modal-title",
-                                            text: "Login"
+                                        $('<h4>', {
+                                            class: 'modal-title',
+                                            text: 'Login'
                                         })
                                     ]
                                 }),
-                                $("<div>", {
-                                    class: "modal-body",
-                                    html: $("<div>", {
-                                        class: "row",
-                                        html: $("<div>", {
-                                            class: "col-xs-12",
-                                            html: $("<form>", {
-                                                html: $("<div>", {
-                                                    class: "form-group",
+                                $('<div>', {
+                                    class: 'modal-body',
+                                    html: $('<div>', {
+                                        class: 'row',
+                                        html: $('<div>', {
+                                            class: 'col-xs-12',
+                                            html: $('<form>', {
+                                                html: $('<div>', {
+                                                    class: 'form-group',
                                                     html: [
-                                                        $("<label>", {
-                                                            for: "username",
-                                                            text: "Username"
+                                                        $('<label>', {
+                                                            for: 'username',
+                                                            text: 'Username'
                                                         }),
-                                                        $("<input>", {
-                                                            id: "username",
+                                                        $('<input>', {
+                                                            id: 'username',
                                                             class:
-                                                                "form-control",
-                                                            type: "text"
+                                                                'form-control',
+                                                            type: 'text'
                                                         }),
-                                                        $("<label>", {
-                                                            for: "password",
-                                                            text: "Password"
+                                                        $('<label>', {
+                                                            for: 'password',
+                                                            text: 'Password'
                                                         }),
-                                                        $("<input>", {
-                                                            id: "password",
+                                                        $('<input>', {
+                                                            id: 'password',
                                                             class:
-                                                                "form-control",
-                                                            type: "password",
+                                                                'form-control',
+                                                            type: 'password',
                                                             keyup: function(e) {
                                                                 if (
                                                                     e.keyCode ===
@@ -255,10 +255,10 @@ $(document).ready(function() {
                                                                 ) {
                                                                     $(this)
                                                                         .closest(
-                                                                            ".modal"
+                                                                            '.modal'
                                                                         )
                                                                         .find(
-                                                                            ".modal-footer"
+                                                                            '.modal-footer'
                                                                         )
                                                                         .find(
                                                                             'button[data-do-login="true"]'
@@ -273,24 +273,24 @@ $(document).ready(function() {
                                         })
                                     })
                                 }),
-                                $("<div>", {
-                                    class: "modal-footer",
+                                $('<div>', {
+                                    class: 'modal-footer',
                                     html: [
-                                        $("<button>", {
-                                            type: "button",
+                                        $('<button>', {
+                                            type: 'button',
                                             class:
-                                                "btn btn-primary float-right",
-                                            "data-do-login": "true",
-                                            text: "Login",
+                                                'btn btn-primary float-right',
+                                            'data-do-login': 'true',
+                                            text: 'Login',
                                             click: function() {
                                                 fbc.base.login.perform();
                                             }
                                         }),
-                                        $("<button>", {
-                                            type: "button",
-                                            class: "btn btn-danger float-right",
-                                            "data-dismiss": "modal",
-                                            text: "Cancel"
+                                        $('<button>', {
+                                            type: 'button',
+                                            class: 'btn btn-danger float-right',
+                                            'data-dismiss': 'modal',
+                                            text: 'Cancel'
                                         })
                                     ]
                                 })
@@ -299,10 +299,10 @@ $(document).ready(function() {
                     })
                 });
 
-                $("body").append(dialog);
+                $('body').append(dialog);
                 dialog.modal();
 
-                dialog.one("hidden.bs.modal", function() {
+                dialog.one('hidden.bs.modal', function() {
                     dialog.remove();
                 });
             }
@@ -310,51 +310,51 @@ $(document).ready(function() {
 
         logout: {
             openConfirmDialog: function() {
-                var dialog = $("<div>", {
-                    class: "modal fade",
-                    html: $("<div>", {
-                        class: "modal-dialog",
-                        html: $("<div>", {
-                            class: "modal-content",
+                var dialog = $('<div>', {
+                    class: 'modal fade',
+                    html: $('<div>', {
+                        class: 'modal-dialog',
+                        html: $('<div>', {
+                            class: 'modal-content',
                             html: [
-                                $("<div>", {
-                                    class: "modal-header",
+                                $('<div>', {
+                                    class: 'modal-header',
                                     html: [
-                                        $("<button>", {
-                                            type: "button",
-                                            class: "close",
-                                            "data-dismiss": "modal",
-                                            html: "&times;"
+                                        $('<button>', {
+                                            type: 'button',
+                                            class: 'close',
+                                            'data-dismiss': 'modal',
+                                            html: '&times;'
                                         }),
-                                        $("<h4>", {
-                                            class: "modal-title",
-                                            text: "Confirm"
+                                        $('<h4>', {
+                                            class: 'modal-title',
+                                            text: 'Confirm'
                                         })
                                     ]
                                 }),
-                                $("<div>", {
-                                    class: "modal-body",
-                                    html: $("<p>", {
-                                        text: "Logout?"
+                                $('<div>', {
+                                    class: 'modal-body',
+                                    html: $('<p>', {
+                                        text: 'Logout?'
                                     })
                                 }),
-                                $("<div>", {
-                                    class: "modal-footer",
+                                $('<div>', {
+                                    class: 'modal-footer',
                                     html: [
-                                        $("<button>", {
-                                            type: "button",
+                                        $('<button>', {
+                                            type: 'button',
                                             class:
-                                                "btn btn-primary float-right",
-                                            text: "Logout",
+                                                'btn btn-primary float-right',
+                                            text: 'Logout',
                                             click: function() {
                                                 fbc.base.logout.perform();
                                             }
                                         }),
-                                        $("<button>", {
-                                            type: "button",
-                                            class: "btn btn-danger float-right",
-                                            "data-dismiss": "modal",
-                                            text: "Cancel"
+                                        $('<button>', {
+                                            type: 'button',
+                                            class: 'btn btn-danger float-right',
+                                            'data-dismiss': 'modal',
+                                            text: 'Cancel'
                                         })
                                     ]
                                 })
@@ -363,71 +363,71 @@ $(document).ready(function() {
                     })
                 });
 
-                $("body").append(dialog);
+                $('body').append(dialog);
                 dialog.modal();
 
-                dialog.one("hidden.bs.modal", function() {
+                dialog.one('hidden.bs.modal', function() {
                     dialog.remove();
                 });
             },
             perform: function() {
                 fbc.base.parameters.token = null;
-                fbc.base.cookies.set("token", "");
+                fbc.base.cookies.set('token', '');
                 $('[data-logged-in="true"]').hide();
                 $('[data-logged-in="false"]').show();
-                $(".modal").modal("hide");
+                $('.modal').modal('hide');
             }
         },
 
         showDialog: function(options) {
             options = options || {};
 
-            if (!options.hasOwnProperty("header")) {
-                options.header = "";
+            if (!options.hasOwnProperty('header')) {
+                options.header = '';
             }
 
-            if (!options.hasOwnProperty("body")) {
+            if (!options.hasOwnProperty('body')) {
                 options.body = [];
             }
 
-            if (!options.hasOwnProperty("buttons")) {
+            if (!options.hasOwnProperty('buttons')) {
                 options.buttons = [];
             }
 
-            var dialog = $("<div>", {
-                class: "modal fade",
-                html: $("<div>", {
-                    class: "modal-dialog",
-                    html: $("<div>", {
-                        class: "modal-content",
+            var dialog = $('<div>', {
+                class: 'modal fade',
+                html: $('<div>', {
+                    class: 'modal-dialog',
+                    html: $('<div>', {
+                        class: 'modal-content',
                         html: [
-                            $("<div>", {
-                                class: "modal-header",
+                            $('<div>', {
+                                class: 'modal-header',
                                 html: [
-                                    $("<button>", {
-                                        type: "button",
-                                        class: "close",
-                                        "data-dismiss": "modal",
-                                        html: "&times;"
+                                    $('<button>', {
+                                        type: 'button',
+                                        class: 'close',
+                                        'data-dismiss': 'modal',
+                                        html: '&times;'
                                     }),
-                                    $("<h4>", {
-                                        class: "modal-title",
+                                    $('<h4>', {
+                                        class: 'modal-title',
                                         text: options.header
                                     })
                                 ]
                             }),
-                            $("<div>", {
-                                class: "modal-body",
+                            $('<div>', {
+                                class: 'modal-body',
                                 html: [
-                                    $("<div>", {
+                                    $('<div>', {
                                         html: options.body
                                     })
                                 ]
                             }),
-                            $("<div>", {
-                                class: "modal-footer",
+                            $('<div>', {
+                                class: 'modal-footer',
                                 html: [
-                                    $("<div>", {
+                                    $('<div>', {
                                         html: options.buttons
                                     })
                                 ]
@@ -437,10 +437,10 @@ $(document).ready(function() {
                 })
             });
 
-            $("body").append(dialog);
+            $('body').append(dialog);
             dialog.modal();
 
-            dialog.one("hidden.bs.modal", function() {
+            dialog.one('hidden.bs.modal', function() {
                 dialog.remove();
             });
         },
@@ -461,42 +461,42 @@ $(document).ready(function() {
 
         query: {
             defaults: {
-                tab: "players",
-                psort: "score"
+                tab: 'players',
+                psort: 'score'
             },
             get: function(stringify) {
                 var params = {};
                 stringify = stringify || false;
 
                 if (location.search.length > 0) {
-                    $.each(location.search.substr(1).split("&"), function() {
-                        var temp = this.split("=");
+                    $.each(location.search.substr(1).split('&'), function() {
+                        var temp = this.split('=');
                         params[temp[0]] = temp[1];
                     });
                 }
 
                 return stringify
                     ? $.map(params, function(value, key) {
-                          return key + "=" + value;
-                      }).join("&")
+                          return key + '=' + value;
+                      }).join('&')
                     : params;
             },
             updateUrl: function(parameters, callback) {
-                if (typeof history.pushState !== "undefined") {
+                if (typeof history.pushState !== 'undefined') {
                     return;
                 }
                 // TODO: SET PARAMETERS TO URL
                 //location.search = '?' + $.param(params);
 
                 var pageName = location.pathname.substr(
-                    location.pathname.lastIndexOf("/") + 1
+                    location.pathname.lastIndexOf('/') + 1
                 );
                 var updatedSearch = getSearchParameters(paramUpdate, true);
 
                 var obj = {
                     search: updatedSearch,
                     page: pageName,
-                    url: pageName + "?" + updatedSearch
+                    url: pageName + '?' + updatedSearch
                 };
                 history.pushState(obj, obj.page, obj.url);
 
@@ -508,9 +508,9 @@ $(document).ready(function() {
 
         loader: {
             set: function(tab) {
-                var $parent = $(".container-fluid").children("#" + tab);
+                var $parent = $('.container-fluid').children('#' + tab);
 
-                if ($parent.children(".loader-icon").length > 0) {
+                if ($parent.children('.loader-icon').length > 0) {
                     return;
                 }
 
@@ -518,15 +518,15 @@ $(document).ready(function() {
                     .children()
                     .first()
                     .before(
-                        $("<div>", {
-                            class: "loader-icon",
-                            html: $("<table>", {
-                                html: $("<tbody>", {
-                                    html: $("<tr>", {
-                                        html: $("<td>", {
-                                            html: $("<img>", {
-                                                src: "img/beer_ajax128.gif",
-                                                alt: ""
+                        $('<div>', {
+                            class: 'loader-icon',
+                            html: $('<table>', {
+                                html: $('<tbody>', {
+                                    html: $('<tr>', {
+                                        html: $('<td>', {
+                                            html: $('<img>', {
+                                                src: 'img/beer_ajax128.gif',
+                                                alt: ''
                                             })
                                         })
                                     })
@@ -536,8 +536,8 @@ $(document).ready(function() {
                     );
             },
             remove: function(tab) {
-                var $parent = $(".container-fluid").children("#" + tab);
-                $parent.children(".loader-icon").remove();
+                var $parent = $('.container-fluid').children('#' + tab);
+                $parent.children('.loader-icon').remove();
             }
         },
 
@@ -545,27 +545,27 @@ $(document).ready(function() {
             $btn
                 .parent()
                 .siblings()
-                .children("button.btn-primary")
-                .removeClass("btn-primary");
+                .children('button.btn-primary')
+                .removeClass('btn-primary');
 
-            $btn.addClass("btn-primary");
+            $btn.addClass('btn-primary');
         },
 
         disableValuesFromOtherSelects: function($selects) {
-            $selects.children("option").prop("disabled", false);
+            $selects.children('option').prop('disabled', false);
 
             $selects.each(function() {
                 var $this = $(this);
                 var value = $this.val();
 
-                if (value === "") {
+                if (value === '') {
                     return;
                 }
 
                 $selects
                     .not($this)
                     .children('option[value="' + value + '"]')
-                    .prop("disabled", true);
+                    .prop('disabled', true);
             });
         },
 

@@ -11,31 +11,31 @@
         },
         initialize: function() {
             ///<summary>Players initialization</summary>
-            console.log("initializing players...");
-            $("#add-new-player").click(fbc.players.openNewDialog);
+            console.log('initializing players...');
+            $('#add-new-player').click(fbc.players.openNewDialog);
 
-            $("#refresh-players").click(function() {
+            $('#refresh-players').click(function() {
                 fbc.players.update(fbc.players.updateTable);
             });
 
-            $("#players-table")
-                .find("thead > tr > th[data-sort-type]")
+            $('#players-table')
+                .find('thead > tr > th[data-sort-type]')
                 .click(function() {
                     // TODO: UPDATE URL BASED ON CLICKED ELEMENT
                 });
 
-            $("#refresh-players").click();
+            $('#refresh-players').click();
         },
         update: function(successCallback, errorCallback) {
             ///<summary>Update fbc.players.dict from server</summary>
             $.ajax({
-                url: fbc.base.parameters.server + "API/players/",
-                method: "GET",
+                url: fbc.base.parameters.server + 'API/players/',
+                method: 'GET',
                 beforeSend: function() {
-                    fbc.base.loader.set("players");
+                    fbc.base.loader.set('players');
                 },
                 complete: function() {
-                    fbc.base.loader.remove("players");
+                    fbc.base.loader.remove('players');
                 },
                 success: function(data) {
                     playerObject = {};
@@ -64,29 +64,29 @@
 
             // TODO: copy player data to temp variable, perform sorting and present data
 
-            $("#players-table")
-                .children("tbody")
+            $('#players-table')
+                .children('tbody')
                 .first()
                 .html(
                     $.map(players, function(elem) {
-                        return $("<tr>", {
+                        return $('<tr>', {
                             html: [
-                                $("<td>", {
-                                    html: $("<img>", {
+                                $('<td>', {
+                                    html: $('<img>', {
                                         src:
                                             elem.rank !== null
                                                 ? elem.rank.image_url
-                                                : "",
+                                                : '',
                                         title:
                                             elem.rank !== null
                                                 ? elem.rank.name
-                                                : ""
+                                                : ''
                                     })
                                 }),
-                                $("<td>", {
+                                $('<td>', {
                                     text: elem.name
                                 }),
-                                $("<td>", {
+                                $('<td>', {
                                     text: elem.score
                                 })
                             ]
@@ -95,48 +95,48 @@
                 );
         },
         openNewDialog: function() {
-            var dialog = $("<div>", {
-                class: "modal fade",
-                html: $("<div>", {
-                    class: "modal-dialog",
-                    html: $("<div>", {
-                        class: "modal-content",
+            var dialog = $('<div>', {
+                class: 'modal fade',
+                html: $('<div>', {
+                    class: 'modal-dialog',
+                    html: $('<div>', {
+                        class: 'modal-content',
                         html: [
-                            $("<div>", {
-                                class: "modal-header",
+                            $('<div>', {
+                                class: 'modal-header',
                                 html: [
-                                    $("<button>", {
-                                        type: "button",
-                                        class: "close",
-                                        "data-dismiss": "modal",
-                                        html: "&times;"
+                                    $('<button>', {
+                                        type: 'button',
+                                        class: 'close',
+                                        'data-dismiss': 'modal',
+                                        html: '&times;'
                                     }),
-                                    $("<h4>", {
-                                        class: "modal-title",
-                                        text: "Add new player"
+                                    $('<h4>', {
+                                        class: 'modal-title',
+                                        text: 'Add new player'
                                     })
                                 ]
                             }),
-                            $("<div>", {
-                                class: "modal-body", // TODO: ADD GENERAL HELP TEXT BLOCK TO MODAL BODY
+                            $('<div>', {
+                                class: 'modal-body', // TODO: ADD GENERAL HELP TEXT BLOCK TO MODAL BODY
                                 html: [
-                                    $("<form>", {
+                                    $('<form>', {
                                         html: [
-                                            $("<div>", {
-                                                class: "form-group",
+                                            $('<div>', {
+                                                class: 'form-group',
                                                 html: [
-                                                    $("<label>", {
-                                                        for: "newPlayerName",
-                                                        text: "Name"
+                                                    $('<label>', {
+                                                        for: 'newPlayerName',
+                                                        text: 'Name'
                                                     }),
-                                                    $("<input>", {
-                                                        id: "newPlayerName",
-                                                        class: "form-control",
-                                                        name: "newPlayer",
-                                                        "data-form-key": "name"
+                                                    $('<input>', {
+                                                        id: 'newPlayerName',
+                                                        class: 'form-control',
+                                                        name: 'newPlayer',
+                                                        'data-form-key': 'name'
                                                     }),
-                                                    $("<p>", {
-                                                        class: "help-block"
+                                                    $('<p>', {
+                                                        class: 'help-block'
                                                     })
                                                 ]
                                             })
@@ -144,13 +144,13 @@
                                     })
                                 ]
                             }),
-                            $("<div>", {
-                                class: "modal-footer",
+                            $('<div>', {
+                                class: 'modal-footer',
                                 html: [
-                                    $("<button>", {
-                                        type: "button",
-                                        class: "btn btn-primary float-right",
-                                        text: "Add",
+                                    $('<button>', {
+                                        type: 'button',
+                                        class: 'btn btn-primary float-right',
+                                        text: 'Add',
                                         click: function() {
                                             // TODO: VALIDATE NAME NOT EMPTY
                                             var data = {};
@@ -158,28 +158,28 @@
                                                 'form input[name="newPlayer"]'
                                             ).each(function() {
                                                 data[
-                                                    $(this).data("formKey")
+                                                    $(this).data('formKey')
                                                 ] = $(this).val();
                                             });
                                             fbc.players.postNew(
                                                 data,
                                                 function() {
                                                     // SUCCESS
-                                                    $("#newPlayerName")
-                                                        .closest(".modal")
-                                                        .modal("hide");
+                                                    $('#newPlayerName')
+                                                        .closest('.modal')
+                                                        .modal('hide');
                                                 },
                                                 function() {
                                                     // FAIL
-                                                    var error = $("<p>", {
+                                                    var error = $('<p>', {
                                                         class:
-                                                            "modal-help bg-danger", // TODO: COME UP WITH BETTER THAN BG DANGER?
+                                                            'modal-help bg-danger', // TODO: COME UP WITH BETTER THAN BG DANGER?
                                                         text:
-                                                            "Error adding new player!"
+                                                            'Error adding new player!'
                                                     });
-                                                    $("#newPlayerName")
-                                                        .closest(".modal")
-                                                        .find(".modal-body")
+                                                    $('#newPlayerName')
+                                                        .closest('.modal')
+                                                        .find('.modal-body')
                                                         .append(error);
                                                     setTimeout(function() {
                                                         error.fadeOut(
@@ -195,11 +195,11 @@
                                             );
                                         }
                                     }),
-                                    $("<button>", {
-                                        type: "button",
-                                        class: "btn btn-danger float-right",
-                                        "data-dismiss": "modal",
-                                        text: "Cancel"
+                                    $('<button>', {
+                                        type: 'button',
+                                        class: 'btn btn-danger float-right',
+                                        'data-dismiss': 'modal',
+                                        text: 'Cancel'
                                     })
                                 ]
                             })
@@ -208,20 +208,20 @@
                 })
             });
 
-            $("body").append(dialog);
+            $('body').append(dialog);
             dialog.modal();
 
-            dialog.one("hidden.bs.modal", function() {
+            dialog.one('hidden.bs.modal', function() {
                 dialog.remove();
             });
         },
         postNew: function(param, successCallback, errorCallback) {
             $.ajax({
-                url: fbc.base.parameters.server + "API/players/",
-                method: "POST",
-                contentType: "application/json",
+                url: fbc.base.parameters.server + 'API/players/',
+                method: 'POST',
+                contentType: 'application/json',
                 headers: {
-                    Authorization: "Token " + fbc.base.parameters.token
+                    Authorization: 'Token ' + fbc.base.parameters.token
                 },
                 data: JSON.stringify(param),
                 beforeSend: function() {
@@ -241,7 +241,7 @@
                         errorCallback(xhr, status, error);
                     }
                     console.log(
-                        "ERROR POSTING NEW PLAYER:" + xhr + status + error
+                        'ERROR POSTING NEW PLAYER:' + xhr + status + error
                     );
                 }
             });
