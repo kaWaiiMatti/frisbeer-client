@@ -478,9 +478,6 @@
             dialog.on("change", 'select[data-form-key="player"]', function(e) {
                 var $target = $(e.currentTarget);
 
-                var newValue = $target.val();
-                var oldValue = $target.data("value");
-
                 var successCallback = function() {
                     var $playerSelects = dialog.find(
                         'select[data-form-key="player"]'
@@ -503,46 +500,7 @@
                 if (game.new) {
                     successCallback();
                 } else {
-                    if (newValue === "") {
-                        if (oldValue !== "") {
-                            // player was removed
-                            fbc.games.playerChange(
-                                game.id,
-                                oldValue,
-                                $target,
-                                "remove",
-                                successCallback
-                            );
-                        }
-                    } else {
-                        if (oldValue === "") {
-                            // player was added
-                            fbc.games.playerChange(
-                                game.id,
-                                newValue,
-                                $target,
-                                "add",
-                                successCallback
-                            );
-                        } else {
-                            // player was changed
-                            fbc.games.playerChange(
-                                game.id,
-                                oldValue,
-                                $target,
-                                "remove",
-                                function() {
-                                    fbc.games.playerChange(
-                                        game.id,
-                                        newValue,
-                                        $target,
-                                        "add",
-                                        successCallback
-                                    );
-                                }
-                            );
-                        }
-                    }
+                    fbc.games.playerChange(game.id, $target, successCallback);
                 }
             });
 
@@ -736,17 +694,18 @@
                 }
             });
         },
-        playerChange: function(
-            gameId,
-            playerId,
-            $select,
-            method,
-            successCallback
-        ) {
+        playerChange: function(gameId, $select, successCallback) {
             var errorMessage = ""; // TODO: ADD ERROR MESSAGES
             var successMessage = "";
             var messageColor = "";
             var successValue = null;
+
+            var newValue = $target.val();
+            var oldValue = $target.data("value");
+
+            var method = oldValue === "" ? "add" : "remove";
+
+            var playerId = method === "add" ? newValue : oldValue;
 
             switch (method) {
                 case "add":
@@ -796,7 +755,7 @@
                     $select.after($msg);
                     fbc.base.hideElementAfter($msg, 3000);
 
-                    if(method === 'remove') {
+                    if (method === "remove") {
                         $select.remove();
                         return;
                     }
