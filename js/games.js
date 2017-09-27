@@ -582,9 +582,9 @@
 
                             var $modal = $btn.closest('.modal');
 
-                            fbc.games.patchState(
+                            fbc.games.patchGame(
                                 gameId,
-                                1,
+                                {state: 1},
                                 function() {
                                     $modal.modal('hide');
                                 },
@@ -621,9 +621,9 @@
 
                             var $modal = $btn.closest('.modal');
 
-                            fbc.games.patchState(
+                            fbc.games.patchGame(
                                 gameId,
-                                0,
+                                {state: 0},
                                 function() {
                                     $modal.modal('hide');
                                 },
@@ -880,7 +880,7 @@
                 }
             });
         },
-        patchState: function(gameId, state, successCallback, errorCallback) {
+        patchGame: function(gameId, data, successCallback, errorCallback) {
             $.ajax({
                 url: fbc.base.parameters.server + 'API/games/' + gameId + '/',
                 method: 'PATCH',
@@ -888,15 +888,7 @@
                 headers: {
                     Authorization: 'Token ' + fbc.base.parameters.token
                 },
-                data: JSON.stringify({
-                    state: state
-                }),
-                beforeSend: function() {
-                    // TODO: do something
-                },
-                complete: function(xhr, status) {
-                    // TODO: do something
-                },
+                data: JSON.stringify(data),
                 success: function(data) {
                     fbc.games.update(fbc.games.updateTable);
 
@@ -908,15 +900,6 @@
                     if ($.isFunction(errorCallback)) {
                         errorCallback(xhr, status, error);
                     }
-                    console.log(
-                        'ERROR PATCHING GAME STATE: gameId' +
-                            gameId +
-                            ',state:' +
-                            state +
-                            xhr +
-                            status +
-                            error
-                    );
                 }
             });
         },
