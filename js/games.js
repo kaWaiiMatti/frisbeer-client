@@ -678,7 +678,8 @@
                 },
                 data: JSON.stringify(data),
                 success: function(data) {
-                    fbc.games.update(fbc.games.updateTable);
+                    fbc.games.dict[data.id] = data;
+                    fbc.games.updateTable();
 
                     if ($.isFunction(successCallback)) {
                         successCallback(data);
@@ -879,7 +880,8 @@
                 },
                 data: JSON.stringify(data),
                 success: function(data) {
-                    fbc.games.update(fbc.games.updateTable);
+                    fbc.games.dict[gameId] = data;
+                    fbc.games.updateTable();
 
                     if ($.isFunction(successCallback)) {
                         successCallback(data);
