@@ -294,6 +294,10 @@
             game = game || {};
             game.new = !game.hasOwnProperty('id');
 
+            if (!game.hasOwnProperty('players')) {
+                game.players = [];
+            }
+
             var players = fbc.players.getList();
 
             var dialog = $('<div>', {
