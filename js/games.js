@@ -724,11 +724,15 @@
                             var $btn = $(this);
                             fbc.base.element.disable($btn);
 
-                            var $modal = $btn.closest('.modal');
-
-                            fbc.games.removeGame(game.id, null, function() {
-                                fbc.base.element.enable($btn);
-                            });
+                            fbc.games.removeGame(
+                                game.id,
+                                function() {
+                                    $btn.closest('.modal').modal('hide');
+                                },
+                                function() {
+                                    fbc.base.element.enable($btn);
+                                }
+                            );
                         }
                     }),
                     $('<button>', {
