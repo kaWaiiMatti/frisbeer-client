@@ -127,6 +127,16 @@
                             );
                         }
 
+                        // hide action buttons if not logged in
+                        if (
+                            fbc.base.parameters.token === null ||
+                            fbc.base.parameters.token.length === 0
+                        ) {
+                            $.each(buttons, function(index, button) {
+                                button.hide();
+                            });
+                        }
+
                         return $('<tr>', {
                             html: [
                                 $('<td>', {
