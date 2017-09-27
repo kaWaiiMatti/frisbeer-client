@@ -379,6 +379,17 @@ $(document).ready(function() {
             }
         },
 
+        element: {
+            disable: function($elem) {
+                $elem.addClass('disabled');
+                $elem.prop('disabled', true);
+            },
+            enable: function($elem) {
+                $elem.removeClass('disabled');
+                $elem.prop('disabled', false);
+            }
+        },
+
         showDialog: function(options) {
             options = options || {};
 
