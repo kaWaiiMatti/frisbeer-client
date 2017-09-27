@@ -123,9 +123,7 @@
                                     class: 'btn btn-primary',
                                     value: 'Enter result',
                                     click: function() {
-                                        fbc.games.openEnterResultDialog(
-                                            elem.id
-                                        );
+                                        fbc.games.openEnterResultDialog(elem);
                                     }
                                 })
                             );
@@ -910,292 +908,188 @@
 
             return $select;
         },
-        openEnterResultDialog: function(gameId) {
+        openEnterResultDialog: function(game) {
+            var $saveButton = $('<button>', {
+                type: 'button',
+                disabled: true,
+                class: 'btn btn-primary float-right disabled',
+                text: 'Save result',
+                click: function() {
+                    var $btn = $(this);
+
+                    fbc.base.element.disable($btn);
+
+                    var $modal = $btn.closest('.modal');
+                    var $selection = $modal
+                        .find('.modal-body')
+                        .find(
+                            'button.active[data-team1-score][data-team2-score]'
+                        );
+
+                    var data = {
+                        team1_score: $selection.data('team1Score'),
+                        team2_score: $selection.data('team2Score'),
+                        state: 2
+                    };
+
+                    fbc.games.patchGame(
+                        game.id,
+                        data,
+                        function() {
+                            $modal.modal('hide');
+                        },
+                        function() {
+                            fbc.base.element.enable($btn);
+                        }
+                    );
+                }
+            });
+
+            var changeActiveButton = function($btn) {
+                $btn
+                    .parent()
+                    .siblings()
+                    .children('button')
+                    .removeClass('active btn-primary')
+                    .addClass('btn-default');
+
+                $btn.removeClass('btn-default').addClass('active btn-primary');
+
+                fbc.base.element.enable($saveButton);
+            };
+
             fbc.base.showDialog({
                 header: 'Enter result',
-                body: [],
-                buttons: []
-            });
-            var dialog = $('<div>', {
-                class: 'modal fade',
-                html: $('<div>', {
-                    class: 'modal-dialog',
-                    html: $('<div>', {
-                        class: 'modal-content',
+                body: [
+                    $('<div>', {
+                        class: 'row',
                         html: [
                             $('<div>', {
-                                class: 'modal-header',
+                                class: 'col-xs-6',
                                 html: [
-                                    $('<button>', {
-                                        type: 'button',
-                                        class: 'close',
-                                        'data-dismiss': 'modal',
-                                        html: '&times;'
+                                    $('<p>', {
+                                        text: 'Team 1'
                                     }),
-                                    $('<h4>', {
-                                        class: 'modal-title',
-                                        text: 'Enter result'
+                                    $('<ul>', {
+                                        html: $.map(
+                                            $.grep(game.players, function(
+                                                player
+                                            ) {
+                                                return player.team === 1;
+                                            }),
+                                            function(player) {
+                                                return $('<li>', {
+                                                    text: player.name
+                                                });
+                                            }
+                                        )
                                     })
                                 ]
                             }),
                             $('<div>', {
-                                class: 'modal-body',
-                                html: $('<div>', {
-                                    html: [
-                                        $('<div>', {
-                                            class: 'row',
-                                            html: [
-                                                $('<div>', {
-                                                    // TEAM 1
-                                                    class: 'col-xs-6',
-                                                    html: [
-                                                        $('<p>', {
-                                                            text: 'Team 1'
-                                                        }),
-                                                        $('<ul>', {
-                                                            'data-field-name':
-                                                                'team1',
-                                                            html: getPlayerNames(
-                                                                ongoingGames[
-                                                                    gameIndex
-                                                                ].team1,
-                                                                true
-                                                            )
-                                                        })
-                                                    ]
-                                                }),
-                                                $('<div>', {
-                                                    // TEAM 2
-                                                    class: 'col-xs-6',
-                                                    html: [
-                                                        $('<p>', {
-                                                            text: 'Team 2'
-                                                        }),
-                                                        $('<ul>', {
-                                                            'data-field-name':
-                                                                'team2',
-                                                            html: getPlayerNames(
-                                                                ongoingGames[
-                                                                    gameIndex
-                                                                ].team2,
-                                                                true
-                                                            )
-                                                        })
-                                                    ]
-                                                })
-                                            ]
-                                        }),
-                                        $('<div>', {
-                                            class: 'row',
-                                            html: [
-                                                $('<div>', {
-                                                    class: 'col-xs-12',
-                                                    html: $('<div>', {
-                                                        class:
-                                                            'btn-group btn-group-justified',
-                                                        'data-form-key':
-                                                            'result',
-                                                        role: 'group',
-                                                        html: [
-                                                            $('<div>', {
-                                                                class:
-                                                                    'btn-group',
-                                                                role: 'group',
-                                                                html: $(
-                                                                    '<button>',
-                                                                    {
-                                                                        type:
-                                                                            'button',
-                                                                        class:
-                                                                            'btn btn-default',
-                                                                        click: function() {
-                                                                            changeActiveButton(
-                                                                                $(
-                                                                                    elem
-                                                                                )
-                                                                            );
-                                                                        },
-                                                                        'data-team1-score': 2,
-                                                                        'data-team2-score': 0,
-                                                                        text:
-                                                                            '2-0'
-                                                                    }
-                                                                )
-                                                            }),
-                                                            $('<div>', {
-                                                                class:
-                                                                    'btn-group',
-                                                                role: 'group',
-                                                                html: $(
-                                                                    '<button>',
-                                                                    {
-                                                                        type:
-                                                                            'button',
-                                                                        class:
-                                                                            'btn btn-default',
-                                                                        click: function() {
-                                                                            changeActiveButton(
-                                                                                $(
-                                                                                    elem
-                                                                                )
-                                                                            );
-                                                                        },
-                                                                        'data-team1-score': 2,
-                                                                        'data-team2-score': 1,
-                                                                        text:
-                                                                            '2-1'
-                                                                    }
-                                                                )
-                                                            }),
-                                                            $('<div>', {
-                                                                class:
-                                                                    'btn-group',
-                                                                role: 'group',
-                                                                html: $(
-                                                                    '<button>',
-                                                                    {
-                                                                        type:
-                                                                            'button',
-                                                                        class:
-                                                                            'btn btn-default',
-                                                                        click: function() {
-                                                                            changeActiveButton(
-                                                                                $(
-                                                                                    elem
-                                                                                )
-                                                                            );
-                                                                        },
-                                                                        'data-team1-score': 1,
-                                                                        'data-team2-score': 2,
-                                                                        text:
-                                                                            '1-2'
-                                                                    }
-                                                                )
-                                                            }),
-                                                            $('<div>', {
-                                                                class:
-                                                                    'btn-group',
-                                                                role: 'group',
-                                                                html: $(
-                                                                    '<button>',
-                                                                    {
-                                                                        type:
-                                                                            'button',
-                                                                        class:
-                                                                            'btn btn-default',
-                                                                        click: function() {
-                                                                            changeActiveButton(
-                                                                                $(
-                                                                                    elem
-                                                                                )
-                                                                            );
-                                                                        },
-                                                                        'data-team1-score': 0,
-                                                                        'data-team2-score': 2,
-                                                                        text:
-                                                                            '0-2'
-                                                                    }
-                                                                )
-                                                            })
-                                                        ]
-                                                    })
-                                                })
-                                            ]
-                                        })
-                                    ]
-                                })
-                            }),
-                            $('<div>', {
-                                class: 'modal-footer',
+                                class: 'col-xs-6',
                                 html: [
-                                    $('<button>', {
-                                        type: 'button',
-                                        class: 'btn btn-primary float-right',
-                                        'data-game-id': gameId,
-                                        'data-team1':
-                                            ongoingGames[gameIndex].team1,
-                                        'data-team2':
-                                            ongoingGames[gameIndex].team2,
-                                        text: 'Post result',
-                                        click: function() {
-                                            var $result = $(elem)
-                                                .closest('.modal')
-                                                .find(
-                                                    'button.btn-primary[data-team1-score][data-team2-score]'
-                                                );
-                                            if ($result.length === 0) {
-                                                enterResultMessage(
-                                                    $(elem)
-                                                        .closest('.modal')
-                                                        .find('.modal-body'),
-                                                    'Select game result!'
-                                                );
-                                                return;
-                                            }
-
-                                            var gameId = $(elem).data('gameId');
-
-                                            var data = {
-                                                team1: $(elem)
-                                                    .data('team1')
-                                                    .split(','),
-                                                team2: $(elem)
-                                                    .data('team2')
-                                                    .split(','),
-                                                team1_score: $result.data(
-                                                    'team1Score'
-                                                ),
-                                                team2_score: $result.data(
-                                                    'team2Score'
-                                                )
-                                            };
-
-                                            if (game.length > 0) {
-                                                data['date'] = new Date(
-                                                    game[0].date
-                                                ).toISOString();
-                                            }
-
-                                            // TODO: IMPLEMENT
-                                            postResult(data, function() {
-                                                $(elem)
-                                                    .closest('.modal')
-                                                    .modal('hide');
-                                            });
-                                        }
+                                    $('<p>', {
+                                        text: 'Team 2'
                                     }),
-                                    $('<button>', {
-                                        type: 'button',
-                                        class: 'btn btn-danger float-right',
-                                        'data-dismiss': 'modal',
-                                        text: 'Cancel'
-                                    }),
-                                    $('<button>', {
-                                        type: 'button',
-                                        class: 'btn btn-danger float-left',
-                                        click: function() {
-                                            var gameId = $(elem)
-                                                .siblings('[data-game-id]')
-                                                .data('gameId');
-                                            removeOngoingGame(gameId);
-                                            $(elem)
-                                                .closest('.modal')
-                                                .modal('hide');
-                                        },
-                                        text: 'Cancel game'
+                                    $('<ul>', {
+                                        html: $.map(
+                                            $.grep(game.players, function(
+                                                player
+                                            ) {
+                                                return player.team === 2;
+                                            }),
+                                            function(player) {
+                                                return $('<li>', {
+                                                    text: player.name
+                                                });
+                                            }
+                                        )
                                     })
                                 ]
                             })
                         ]
+                    }),
+                    $('<div>', {
+                        class: 'row',
+                        html: [
+                            $('<div>', {
+                                class: 'col-xs-12',
+                                html: $('<div>', {
+                                    class: 'btn-group btn-group-justified',
+                                    role: 'group',
+                                    html: [
+                                        $('<div>', {
+                                            class: 'btn-group',
+                                            role: 'group',
+                                            html: $('<button>', {
+                                                type: 'button',
+                                                class: 'btn btn-default',
+                                                click: function() {
+                                                    changeActiveButton($(this));
+                                                },
+                                                'data-team1-score': 2,
+                                                'data-team2-score': 0,
+                                                text: '2-0'
+                                            })
+                                        }),
+                                        $('<div>', {
+                                            class: 'btn-group',
+                                            role: 'group',
+                                            html: $('<button>', {
+                                                type: 'button',
+                                                class: 'btn btn-default',
+                                                click: function() {
+                                                    changeActiveButton($(this));
+                                                },
+                                                'data-team1-score': 2,
+                                                'data-team2-score': 1,
+                                                text: '2-1'
+                                            })
+                                        }),
+                                        $('<div>', {
+                                            class: 'btn-group',
+                                            role: 'group',
+                                            html: $('<button>', {
+                                                type: 'button',
+                                                class: 'btn btn-default',
+                                                click: function() {
+                                                    changeActiveButton($(this));
+                                                },
+                                                'data-team1-score': 1,
+                                                'data-team2-score': 2,
+                                                text: '1-2'
+                                            })
+                                        }),
+                                        $('<div>', {
+                                            class: 'btn-group',
+                                            role: 'group',
+                                            html: $('<button>', {
+                                                type: 'button',
+                                                class: 'btn btn-default',
+                                                click: function() {
+                                                    changeActiveButton($(this));
+                                                },
+                                                'data-team1-score': 0,
+                                                'data-team2-score': 2,
+                                                text: '0-2'
+                                            })
+                                        })
+                                    ]
+                                })
+                            })
+                        ]
                     })
-                })
-            });
-
-            $('body').append(dialog);
-            dialog.modal();
-
-            dialog.one('hidden.bs.modal', function() {
-                dialog.remove();
+                ],
+                buttons: [
+                    $saveButton,
+                    $('<button>', {
+                        type: 'button',
+                        class: 'btn btn-danger float-right',
+                        'data-dismiss': 'modal',
+                        text: 'Cancel'
+                    })
+                ]
             });
         }
     };
