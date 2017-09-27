@@ -10,8 +10,6 @@
             return locations;
         },
         initialize: function() {
-            console.log('initializing locations...');
-
             $('#add-new-location').click(fbc.locations.openNewDialog);
 
             $('#refresh-locations').click(function() {
@@ -240,12 +238,6 @@
                     Authorization: 'Token ' + fbc.base.parameters.token
                 },
                 data: JSON.stringify(param),
-                beforeSend: function() {
-                    // TODO: do something
-                },
-                complete: function(xhr, status) {
-                    // TODO: do something
-                },
                 success: function(data) {
                     fbc.locations.update(fbc.locations.updateTable);
                     if ($.isFunction(successCallback)) {
@@ -256,9 +248,6 @@
                     if ($.isFunction(errorCallback)) {
                         errorCallback(xhr, status, error);
                     }
-                    console.log(
-                        'ERROR POSTING NEW LOCATION:' + xhr + status + error
-                    );
                 }
             });
         }

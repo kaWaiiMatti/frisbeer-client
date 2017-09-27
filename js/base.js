@@ -21,8 +21,6 @@ $(document).ready(function() {
 
         initialize: function() {
             ///<summary>Common initializations</summary>
-            console.log('initializing base...');
-
             $('.container-fluid')
                 .children()
                 .hide();

@@ -11,7 +11,6 @@
         },
         initialize: function() {
             ///<summary>Players initialization</summary>
-            console.log('initializing players...');
             $('#add-new-player').click(fbc.players.openNewDialog);
 
             $('#refresh-players').click(function() {
@@ -61,8 +60,6 @@
 
             players.sort(fbc.base.sorting.score);
             players.reverse();
-
-            // TODO: copy player data to temp variable, perform sorting and present data
 
             $('#players-table')
                 .children('tbody')
@@ -224,12 +221,6 @@
                     Authorization: 'Token ' + fbc.base.parameters.token
                 },
                 data: JSON.stringify(param),
-                beforeSend: function() {
-                    // TODO: do something
-                },
-                complete: function(xhr, status) {
-                    // TODO: do something
-                },
                 success: function(data) {
                     fbc.players.update(fbc.players.updateTable);
                     if ($.isFunction(successCallback)) {
@@ -240,9 +231,6 @@
                     if ($.isFunction(errorCallback)) {
                         errorCallback(xhr, status, error);
                     }
-                    console.log(
-                        'ERROR POSTING NEW PLAYER:' + xhr + status + error
-                    );
                 }
             });
         }

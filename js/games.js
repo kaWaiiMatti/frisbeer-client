@@ -7,8 +7,6 @@
             });
         },
         initialize: function() {
-            console.log('initializing games...');
-
             $('#add-new-game').click(fbc.games.openGameDialog);
             $('#refresh-games').click(function() {
                 fbc.games.update(fbc.games.updateTable);
@@ -689,9 +687,6 @@
                     if ($.isFunction(errorCallback)) {
                         errorCallback(xhr, status, error);
                     }
-                    console.log(
-                        'ERROR POSTING NEW GAME:' + xhr + status + error
-                    );
                 }
             });
         },
@@ -855,18 +850,6 @@
                 },
                 error: function(xhr, status, error) {
                     $select.val($select.data('value'));
-
-                    console.log(
-                        'ERROR ' +
-                            successMessage +
-                            ' PLAYER to game ' +
-                            gameId +
-                            ',player:' +
-                            playerId +
-                            xhr +
-                            status +
-                            error
-                    );
                 }
             });
         },
