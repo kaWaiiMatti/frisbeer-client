@@ -407,6 +407,14 @@ $(document).ready(function() {
                 options.closeButton = null;
             }
 
+            if (!options.hasOwnProperty('modalClasses')) {
+                options.modalClasses = [];
+            }
+
+            if (!options.hasOwnProperty('dialogShown')) {
+                options.dialogShown = null;
+            }
+
             if (options.closeButton !== null) {
                 options.buttons.push(
                     $('<button>', {
@@ -421,7 +429,7 @@ $(document).ready(function() {
             var dialog = $('<div>', {
                 class: 'modal fade',
                 html: $('<div>', {
-                    class: 'modal-dialog',
+                    class: 'modal-dialog ' + options.modalClasses.join(' '),
                     html: $('<div>', {
                         class: 'modal-content',
                         html: [
@@ -461,12 +469,18 @@ $(document).ready(function() {
                 })
             });
 
-            $('body').append(dialog);
-            dialog.modal();
+            if ($.isFunction(options.dialogShown)) {
+                dialog.one('shown.bs.modal', function() {
+                    options.dialogShown();
+                });
+            }
 
             dialog.one('hidden.bs.modal', function() {
                 dialog.remove();
             });
+
+            $('body').append(dialog);
+            dialog.modal();
         },
 
         sorting: {
