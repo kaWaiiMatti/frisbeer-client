@@ -72,6 +72,15 @@
                                               ' long:' +
                                               elem.longitude
                                             : ''
+                                }),
+                                $('<td>', {
+                                    html: $('<button>', {
+                                        class: 'btn btn-primary',
+                                        text: 'Show on map',
+                                        click: function() {
+                                            fbc.locations.showOnMap(elem);
+                                        }
+                                    })
                                 })
                             ]
                         });
@@ -249,6 +258,20 @@
                         errorCallback(xhr, status, error);
                     }
                 }
+            });
+        },
+        showOnMap: function(location) {
+            if (typeof location === 'number') {
+                location = fbc.locations.dict[location];
+            }
+
+            fbc.base.openMapDialog({
+                header: location.name,
+                center: {
+                    latitude: Number(location.latitude),
+                    longitude: Number(location.longitude)
+                },
+                markCenter: true
             });
         }
     };

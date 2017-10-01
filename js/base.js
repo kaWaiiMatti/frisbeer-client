@@ -19,6 +19,17 @@ $(document).ready(function() {
             maxPlayers: 6
         },
 
+        ol: {
+            defaultCenter: {
+                latitude: 65.0,
+                longitude: 25
+            },
+            zoom: 15,
+            marker: $('<span>', {
+                class: 'glyphicon glyphicon-map-marker'
+            })[0]
+        },
+
         initialize: function() {
             ///<summary>Common initializations</summary>
             $('.container-fluid')
@@ -481,6 +492,67 @@ $(document).ready(function() {
 
             $('body').append(dialog);
             dialog.modal();
+        },
+
+        openMapDialog: function(options) {
+            options = options || {};
+
+            if (!options.hasOwnProperty('center')) {
+                options.center = {
+                    latitude: fbc.base.ol.defaultCenter.latitude,
+                    longitude: fbc.base.ol.defaultCenter.longitude
+                };
+            }
+
+            if (!options.hasOwnProperty('markCenter')) {
+                options.overlayCoords = false;
+            }
+
+            var $map = $('<div>');
+
+            var dialogShown = function() {
+                var coords = ol.proj.fromLonLat([
+                    options.center.longitude,
+                    options.center.latitude
+                ]);
+
+                var map = new ol.Map({
+                    layers: [
+                        new ol.layer.Tile({
+                            source: new ol.source.OSM()
+                        })
+                    ],
+                    target: $map[0],
+                    controls: ol.control.defaults({
+                        attributionOptions: /** @type {olx.control.AttributionOptions} */ ({
+                            collapsible: false
+                        })
+                    }),
+                    view: new ol.View({
+                        center: coords,
+                        zoom: fbc.base.ol.zoom
+                    })
+                });
+
+                if (options.markCenter) {
+                    map.addOverlay(
+                        new ol.Overlay({
+                            position: coords,
+                            positioning: 'bottom-center',
+                            element: fbc.base.ol.marker,
+                            stopEvent: false
+                        })
+                    );
+                }
+            };
+
+            fbc.base.showDialog({
+                header: options.header,
+                body: [$map],
+                closeButton: 'Close',
+                modalClasses: ['modal-lg'],
+                dialogShown: dialogShown
+            });
         },
 
         sorting: {

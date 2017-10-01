@@ -185,3 +185,8 @@ header {
 .loader-icon > table td {
     text-align: center;
 }
+
+.glyphicon-map-marker {
+    font-size: 2.25em;
+    color: blue;
+}
