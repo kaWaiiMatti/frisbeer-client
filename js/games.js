@@ -595,14 +595,9 @@
                                 }
                             );
                         }
-                    }),
-                    $('<button>', {
-                        type: 'button',
-                        class: 'btn btn-danger float-right',
-                        'data-dismiss': 'modal',
-                        text: 'Cancel'
                     })
-                ]
+                ],
+                closeButton: 'Cancel'
             });
         },
         confirmDeformTeams: function(gameId) {
@@ -631,14 +626,9 @@
                                 }
                             );
                         }
-                    }),
-                    $('<button>', {
-                        type: 'button',
-                        class: 'btn btn-danger float-right',
-                        'data-dismiss': 'modal',
-                        text: 'Cancel'
                     })
-                ]
+                ],
+                closeButton: 'Cancel'
             });
         },
         gatherGameInfo: function($element) {
@@ -744,14 +734,9 @@
                                 }
                             );
                         }
-                    }),
-                    $('<button>', {
-                        type: 'button',
-                        class: 'btn btn-danger float-right',
-                        'data-dismiss': 'modal',
-                        text: 'Cancel'
                     })
-                ]
+                ],
+                closeButton: 'Cancel'
             });
         },
         removeGame: function(gameId, successCallback, errorCallback) {
@@ -1085,14 +1070,9 @@
                     })
                 ],
                 buttons: [
-                    $saveButton,
-                    $('<button>', {
-                        type: 'button',
-                        class: 'btn btn-danger float-right',
-                        'data-dismiss': 'modal',
-                        text: 'Cancel'
-                    })
-                ]
+                    $saveButton
+                ],
+                closeButton: 'Cancel'
             });
         }
     };

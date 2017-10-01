@@ -403,6 +403,21 @@ $(document).ready(function() {
                 options.buttons = [];
             }
 
+            if (!options.hasOwnProperty('closeButton')) {
+                options.closeButton = null;
+            }
+
+            if (options.closeButton !== null) {
+                options.buttons.push(
+                    $('<button>', {
+                        type: 'button',
+                        class: 'btn btn-danger float-right',
+                        'data-dismiss': 'modal',
+                        text: options.closeButton
+                    })
+                );
+            }
+
             var dialog = $('<div>', {
                 class: 'modal fade',
                 html: $('<div>', {
