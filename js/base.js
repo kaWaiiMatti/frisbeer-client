@@ -21,9 +21,10 @@ $(document).ready(function() {
 
         ol: {
             defaultCenter: {
-                latitude: 65.0,
-                longitude: 25
+                latitude: 65.016667,
+                longitude: 25.466667
             },
+            decimalPlaces: 5,
             zoom: 15,
             marker: $('<span>', {
                 class: 'glyphicon glyphicon-map-marker'
@@ -508,51 +509,75 @@ $(document).ready(function() {
                 options.overlayCoords = false;
             }
 
+            if (!options.hasOwnProperty('modalClasses')) {
+                options.modalClasses = ['modal-lg'];
+            }
+
             var $map = $('<div>');
 
-            var dialogShown = function() {
-                var coords = ol.proj.fromLonLat([
-                    options.center.longitude,
-                    options.center.latitude
-                ]);
+            if (!options.hasOwnProperty('dialogShown')) {
+                options.dialogShown = function() {
+                    var coords = ol.proj.fromLonLat([
+                        options.center.longitude,
+                        options.center.latitude
+                    ]);
 
-                var map = new ol.Map({
-                    layers: [
-                        new ol.layer.Tile({
-                            source: new ol.source.OSM()
+                    var map = new ol.Map({
+                        layers: [
+                            new ol.layer.Tile({
+                                source: new ol.source.OSM()
+                            })
+                        ],
+                        target: $map[0],
+                        controls: ol.control.defaults({
+                            attributionOptions: /** @type {olx.control.AttributionOptions} */ ({
+                                collapsible: false
+                            })
+                        }),
+                        view: new ol.View({
+                            center: coords,
+                            zoom: fbc.base.ol.zoom
                         })
-                    ],
-                    target: $map[0],
-                    controls: ol.control.defaults({
-                        attributionOptions: /** @type {olx.control.AttributionOptions} */ ({
-                            collapsible: false
-                        })
-                    }),
-                    view: new ol.View({
-                        center: coords,
-                        zoom: fbc.base.ol.zoom
-                    })
+                    });
+
+                    if (options.markCenter) {
+                        map.addOverlay(
+                            new ol.Overlay({
+                                position: coords,
+                                positioning: 'bottom-center',
+                                element: fbc.base.ol.marker,
+                                stopEvent: false
+                            })
+                        );
+                    }
+
+                    if (
+                        options.hasOwnProperty('mapClick') &&
+                        $.isFunction(options.mapClick)
+                    ) {
+                        map.on('click', options.mapClick);
+                    }
+                };
+            }
+
+            var body = [];
+
+            if (options.hasOwnProperty('beforeMap')) {
+                $.each(options.beforeMap, function(index, element) {
+                    body.push(element);
                 });
+            }
 
-                if (options.markCenter) {
-                    map.addOverlay(
-                        new ol.Overlay({
-                            position: coords,
-                            positioning: 'bottom-center',
-                            element: fbc.base.ol.marker,
-                            stopEvent: false
-                        })
-                    );
-                }
-            };
+            body.push($map);
 
-            fbc.base.showDialog({
-                header: options.header,
-                body: [$map],
-                closeButton: 'Close',
-                modalClasses: ['modal-lg'],
-                dialogShown: dialogShown
-            });
+            if (options.hasOwnProperty('afterMap')) {
+                $.each(options.afterMap, function(index, element) {
+                    body.push(element);
+                });
+            }
+            options.body = body;
+
+            fbc.base.showDialog(options);
         },
 
         sorting: {

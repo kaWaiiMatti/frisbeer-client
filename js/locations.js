@@ -87,155 +87,109 @@
                     })
                 );
         },
-        openNewDialog: function() {
-            var dialog = $('<div>', {
-                class: 'modal fade',
-                html: $('<div>', {
-                    class: 'modal-dialog',
-                    html: $('<div>', {
-                        class: 'modal-content',
-                        html: [
-                            $('<div>', {
-                                class: 'modal-header',
-                                html: [
-                                    $('<button>', {
-                                        type: 'button',
-                                        class: 'close',
-                                        'data-dismiss': 'modal',
-                                        html: '&times;'
-                                    }),
-                                    $('<h4>', {
-                                        class: 'modal-title',
-                                        text: 'Add new location'
-                                    })
-                                ]
-                            }),
-                            $('<div>', {
-                                class: 'modal-body',
-                                html: [
-                                    $('<form>', {
-                                        html: [
-                                            $('<div>', {
-                                                class: 'form-group',
-                                                html: [
-                                                    $('<label>', {
-                                                        for: 'newLocationName',
-                                                        text: 'Name'
-                                                    }),
-                                                    $('<input>', {
-                                                        id: 'newLocationName',
-                                                        class: 'form-control',
-                                                        name: 'newLocation',
-                                                        'data-form-key': 'name'
-                                                    }),
-                                                    $('<label>', {
-                                                        for:
-                                                            'newLocationLatitude',
-                                                        text: 'Latitude'
-                                                    }),
-                                                    $('<input>', {
-                                                        id:
-                                                            'newLocationLatitude',
-                                                        class: 'form-control',
-                                                        name: 'newLocation',
-                                                        type: 'number',
-                                                        step: 0.00001,
-                                                        'data-form-key':
-                                                            'latitude'
-                                                    }),
-                                                    $('<label>', {
-                                                        for:
-                                                            'newLocationLongitude',
-                                                        text: 'Longitude'
-                                                    }),
-                                                    $('<input>', {
-                                                        id:
-                                                            'newLocationLongitude',
-                                                        class: 'form-control',
-                                                        name: 'newLocation',
-                                                        type: 'number',
-                                                        step: 0.00001,
-                                                        'data-form-key':
-                                                            'longitude'
-                                                    }),
-                                                    $('<p>', {
-                                                        class: 'help-block'
-                                                    })
-                                                ]
-                                            })
-                                        ]
-                                    })
-                                ]
-                            }),
-                            $('<div>', {
-                                class: 'modal-footer',
-                                html: [
-                                    $('<button>', {
-                                        type: 'button',
-                                        class: 'btn btn-primary float-right',
-                                        text: 'Add',
-                                        click: function() {
-                                            // TODO: VALIDATE NAME NOT EMPTY
-                                            var $modal = $(this).closest(
-                                                '.modal'
-                                            );
 
-                                            var data = {};
-                                            $(
-                                                'form input[name="newLocation"]'
-                                            ).each(function() {
-                                                data[
-                                                    $(this).data('formKey')
-                                                ] = $(this).val();
-                                            });
-                                            fbc.locations.postNew(
-                                                data,
-                                                function() {
-                                                    $modal.modal('hide');
-                                                },
-                                                function() {
-                                                    // FAIL
-                                                    var error = $('<p>', {
-                                                        class:
-                                                            'modal-help bg-danger', // TODO: COME UP WITH BETTER THAN BG DANGER?
-                                                        text:
-                                                            'Error adding new location!'
-                                                    });
-                                                    $modal
-                                                        .find('.modal-body')
-                                                        .append(error);
-                                                    setTimeout(function() {
-                                                        error.fadeOut(
-                                                            400,
-                                                            function() {
-                                                                $(
-                                                                    this
-                                                                ).remove();
-                                                            }
-                                                        );
-                                                    }, 3000);
-                                                }
-                                            );
-                                        }
-                                    }),
-                                    $('<button>', {
-                                        type: 'button',
-                                        class: 'btn btn-danger float-right',
-                                        'data-dismiss': 'modal',
-                                        text: 'Cancel'
-                                    })
-                                ]
+        openNewDialog: function() {
+            var $form = $('<form>', {
+                html: [
+                    $('<div>', {
+                        class: 'form-group',
+                        html: [
+                            $('<label>', {
+                                text: 'Name'
+                            }),
+                            $('<input>', {
+                                name: "newLocation",
+                                class: 'form-control',
+                                'data-form-key': 'name'
+                            }),
+                            $('<label>', {
+                                text: 'Latitude'
+                            }),
+                            $('<input>', {
+                                name: "newLocation",
+                                class: 'form-control',
+                                type: 'number',
+                                step: 0.00001,
+                                'data-form-key': 'latitude'
+                            }),
+                            $('<label>', {
+                                text: 'Longitude'
+                            }),
+                            $('<input>', {
+                                name: "newLocation",
+                                class: 'form-control',
+                                type: 'number',
+                                step: 0.00001,
+                                'data-form-key': 'longitude'
                             })
                         ]
                     })
-                })
+                ]
             });
 
-            $('body').append(dialog);
-            dialog.modal();
+            $form.on(
+                'change',
+                'input[data-form-key="latitude"], input[data-form-key="longitude"]',
+                function() {
+                    // TODO: MOVE MAP MARKER TO GIVEN COORDS AND CENTER MAP AROUND THAT SPOT
+                }
+            );
 
-            dialog.one('hidden.bs.modal', function() {
-                dialog.remove();
+            fbc.base.openMapDialog({
+                header: 'Add new location',
+                beforeMap: [$form],
+                buttons: [
+                    $('<button>', {
+                        type: 'button',
+                        class: 'btn btn-primary float-right',
+                        text: 'Add',
+                        click: function() {
+                            // TODO: VALIDATE NAME NOT EMPTY
+                            var $modal = $(this).closest('.modal');
+
+                            var data = {};
+                            $(
+                                'form input[name="newLocation"]'
+                            ).each(function() {
+                                data[$(this).data('formKey')] = $(this).val();
+                            });
+                            fbc.locations.postNew(
+                                data,
+                                function() {
+                                    $modal.modal('hide');
+                                },
+                                function() {
+                                    // FAIL
+                                    var error = $('<p>', {
+                                        class: 'modal-help bg-danger', // TODO: COME UP WITH BETTER THAN BG DANGER?
+                                        text: 'Error adding new location!'
+                                    });
+                                    $modal.find('.modal-body').append(error);
+                                    setTimeout(function() {
+                                        error.fadeOut(400, function() {
+                                            $(this).remove();
+                                        });
+                                    }, 3000);
+                                }
+                            );
+                        }
+                    })
+                ],
+                closeButton: 'Cancel',
+                mapClick: function(e) {
+                    var coordinates = ol.proj.toLonLat(e.coordinate);
+                    var $modal = $(e.originalEvent.target).closest('.modal');
+
+                    $modal
+                        .find('.modal-body')
+                        .find('input[data-form-key="longitude"]')
+                        .val(coordinates[0].toFixed(fbc.base.ol.decimalPlaces));
+
+                    $modal
+                        .find('.modal-body')
+                        .find('input[data-form-key="latitude"]')
+                        .val(coordinates[1].toFixed(fbc.base.ol.decimalPlaces));
+                }
             });
         },
         postNew: function(param, successCallback, errorCallback) {
@@ -271,7 +225,8 @@
                     latitude: Number(location.latitude),
                     longitude: Number(location.longitude)
                 },
-                markCenter: true
+                markCenter: true,
+                closeButton: 'Close'
             });
         }
     };
