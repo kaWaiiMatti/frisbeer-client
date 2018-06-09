@@ -107,18 +107,6 @@
                                     'data-logged-in': 'true',
                                     type: 'button',
                                     class: 'btn btn-primary',
-                                    value: 'Deform teams',
-                                    click: function() {
-                                        fbc.games.confirmDeformTeams(elem.id);
-                                    }
-                                })
-                            );
-
-                            buttons.push(
-                                $('<input>', {
-                                    'data-logged-in': 'true',
-                                    type: 'button',
-                                    class: 'btn btn-primary',
                                     value: 'Enter result',
                                     click: function() {
                                         fbc.games.openEnterResultDialog(elem);
@@ -586,37 +574,6 @@
 
                             fbc.games.formTeams(
                                 gameId,
-                                function() {
-                                    $modal.modal('hide');
-                                },
-                                function() {
-                                    fbc.base.element.enable($btn);
-                                }
-                            );
-                        }
-                    })
-                ],
-                closeButton: 'Cancel'
-            });
-        },
-        confirmDeformTeams: function(gameId) {
-            fbc.base.showDialog({
-                header: 'Deform teams',
-                body: fbc.games.getPlayerNames(fbc.games.dict[gameId]),
-                buttons: [
-                    $('<button>', {
-                        type: 'button',
-                        class: 'btn btn-primary float-right',
-                        text: 'Deform',
-                        click: function() {
-                            var $btn = $(this);
-                            fbc.base.element.disable($btn);
-
-                            var $modal = $btn.closest('.modal');
-
-                            fbc.games.patchGame(
-                                gameId,
-                                { state: 0 },
                                 function() {
                                     $modal.modal('hide');
                                 },
