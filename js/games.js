@@ -160,6 +160,8 @@
                         })
                     });
                 case 1:
+                case 2:
+                case 3:
                     return [
                         $('<p>', {
                             text: 'Team 1'
@@ -192,79 +194,6 @@
                             )
                         })
                     ];
-                case 2:
-                case 4:
-                    var team1 = [];
-                    var team2 = [];
-                    var noTeam = [];
-
-                    for (var i = 0; i < game.players.length; i++) {
-                        var player = game.players[i];
-                        switch (player.team) {
-                            case 1:
-                                team1.push[player.id];
-                                break;
-                            case 2:
-                                team2.push[player.id];
-                                break;
-                            default:
-                                noTeam.push(player.id);
-                        }
-                    }
-
-                    var result = [];
-
-                    if (noTeam.length > 0) {
-                        if (team1.length > 0 || team2.length > 0) {
-                            result.push($('<p>', {
-                                text: 'No team'
-                            }));
-                        }
-
-                        result.push(
-                            $('<ul>', {
-                                html: $.map(noTeam, function (player) {
-                                    return $('<li>', {
-                                        text: player.name
-                                    });
-                                })
-                            })
-                        );
-                    }
-
-                    if (team1.length > 0) {
-                        result.push($('<p>', {
-                            text: 'Team 1'
-                        }));
-
-                        result.push(
-                            $('<ul>', {
-                                html: $.map(team1, function (player) {
-                                    return $('<li>', {
-                                        text: player.name
-                                    });
-                                })
-                            })
-                        );
-                    }
-
-                    if (team2.length > 0) {
-                        result.push($('<p>', {
-                            text: 'Team 2'
-                        }));
-
-                        result.push(
-                            $('<ul>', {
-                                html: $.map(team2, function (player) {
-                                    return $('<li>', {
-                                        text: player.name
-                                    });
-                                })
-                            })
-                        );
-                    }
-
-                    return result;
                 default:
                     return '';
             }
