@@ -1,30 +1,30 @@
-(function(fbc) {
+(function (fbc) {
     fbc.games = {
         dict: {},
-        getList: function() {
-            return $.map(fbc.games.dict, function(game) {
+        getList: function () {
+            return $.map(fbc.games.dict, function (game) {
                 return game;
             });
         },
-        initialize: function() {
+        initialize: function () {
             $('#add-new-game').click(fbc.games.openGameDialog);
-            $('#refresh-games').click(function() {
+            $('#refresh-games').click(function () {
                 fbc.games.update(fbc.games.updateTable);
             });
 
             $('#refresh-games').click();
         },
-        update: function(successCallback, errorCallback) {
+        update: function (successCallback, errorCallback) {
             $.ajax({
                 url: fbc.base.parameters.server + 'API/games/',
                 method: 'GET',
-                beforeSend: function() {
+                beforeSend: function () {
                     fbc.base.loader.set('games');
                 },
-                complete: function() {
+                complete: function () {
                     fbc.base.loader.remove('games');
                 },
-                success: function(data) {
+                success: function (data) {
                     gamesObject = {};
                     for (var i = 0; i < data.length; i++) {
                         gamesObject[data[i].id] = data[i];
@@ -35,14 +35,14 @@
                         successCallback(data);
                     }
                 },
-                error: function(xhr, status, error) {
+                error: function (xhr, status, error) {
                     if ($.isFunction(errorCallback)) {
                         errorCallback(xhr, status, error);
                     }
                 }
             });
         },
-        updateTable: function() {
+        updateTable: function () {
             var games = fbc.games.getList().slice();
 
             games.sort(fbc.base.sorting.date);
@@ -52,7 +52,7 @@
                 .children('tbody')
                 .first()
                 .html(
-                    $.map(games, function(elem) {
+                    $.map(games, function (elem) {
                         var buttons = [];
 
                         if (elem.state === 0 && elem.players.length === 0) {
@@ -62,7 +62,7 @@
                                     type: 'button',
                                     class: 'btn btn-primary',
                                     value: 'Remove game',
-                                    click: function() {
+                                    click: function () {
                                         fbc.games.confirmRemoveGame(elem);
                                     }
                                 })
@@ -72,7 +72,7 @@
                         if (
                             elem.state === 0 &&
                             elem.players.length ===
-                                fbc.base.parameters.maxPlayers
+                            fbc.base.parameters.maxPlayers
                         ) {
                             buttons.push(
                                 $('<input>', {
@@ -80,7 +80,7 @@
                                     type: 'button',
                                     class: 'btn btn-primary',
                                     value: 'Form teams',
-                                    click: function() {
+                                    click: function () {
                                         fbc.games.confirmFormTeams(elem.id);
                                     }
                                 })
@@ -94,7 +94,7 @@
                                     type: 'button',
                                     class: 'btn btn-primary',
                                     value: 'Edit game',
-                                    click: function() {
+                                    click: function () {
                                         fbc.games.openGameDialog(elem);
                                     }
                                 })
@@ -108,7 +108,7 @@
                                     type: 'button',
                                     class: 'btn btn-primary',
                                     value: 'Enter result',
-                                    click: function() {
+                                    click: function () {
                                         fbc.games.openEnterResultDialog(elem);
                                     }
                                 })
@@ -120,7 +120,7 @@
                             fbc.base.parameters.token === null ||
                             fbc.base.parameters.token.length === 0
                         ) {
-                            $.each(buttons, function(index, button) {
+                            $.each(buttons, function (index, button) {
                                 button.hide();
                             });
                         }
@@ -131,10 +131,9 @@
                                     text: new Date(elem.date).toLocaleString()
                                 }),
                                 $('<td>', {
-                                    text:
-                                        elem.location_repr !== null
-                                            ? elem.location_repr.name
-                                            : ''
+                                    text: elem.location_repr !== null ?
+                                        elem.location_repr.name :
+                                        ''
                                 }),
                                 $('<td>', {
                                     html: fbc.games.getPlayerNames(elem)
@@ -150,12 +149,14 @@
                     })
                 );
         },
-        getPlayerNames: function(game) {
+        getPlayerNames: function (game) {
             switch (game.state) {
                 case 0:
                     return $('<ul>', {
-                        html: $.map(game.players, function(player) {
-                            return $('<li>', { text: player.name });
+                        html: $.map(game.players, function (player) {
+                            return $('<li>', {
+                                text: player.name
+                            });
                         })
                     });
                 case 1:
@@ -165,10 +166,10 @@
                         }),
                         $('<ul>', {
                             html: $.map(
-                                $.grep(game.players, function(p) {
+                                $.grep(game.players, function (p) {
                                     return p.team === 1;
                                 }),
-                                function(p) {
+                                function (p) {
                                     return $('<li>', {
                                         text: p.name
                                     });
@@ -180,10 +181,10 @@
                         }),
                         $('<ul>', {
                             html: $.map(
-                                $.grep(game.players, function(p) {
+                                $.grep(game.players, function (p) {
                                     return p.team === 2;
                                 }),
-                                function(p) {
+                                function (p) {
                                     return $('<li>', {
                                         text: p.name
                                     });
@@ -215,37 +216,49 @@
 
                     if (noTeam.length > 0) {
                         if (team1.length > 0 || team2.length > 0) {
-                            result.push($('<p>', { text: 'No team' }));
+                            result.push($('<p>', {
+                                text: 'No team'
+                            }));
                         }
 
                         result.push(
                             $('<ul>', {
-                                html: $.map(noTeam, function(player) {
-                                    return $('<li>', { text: player.name });
+                                html: $.map(noTeam, function (player) {
+                                    return $('<li>', {
+                                        text: player.name
+                                    });
                                 })
                             })
                         );
                     }
 
                     if (team1.length > 0) {
-                        result.push($('<p>', { text: 'Team 1' }));
+                        result.push($('<p>', {
+                            text: 'Team 1'
+                        }));
 
                         result.push(
                             $('<ul>', {
-                                html: $.map(team1, function(player) {
-                                    return $('<li>', { text: player.name });
+                                html: $.map(team1, function (player) {
+                                    return $('<li>', {
+                                        text: player.name
+                                    });
                                 })
                             })
                         );
                     }
 
                     if (team2.length > 0) {
-                        result.push($('<p>', { text: 'Team 2' }));
+                        result.push($('<p>', {
+                            text: 'Team 2'
+                        }));
 
                         result.push(
                             $('<ul>', {
-                                html: $.map(team2, function(player) {
-                                    return $('<li>', { text: player.name });
+                                html: $.map(team2, function (player) {
+                                    return $('<li>', {
+                                        text: player.name
+                                    });
                                 })
                             })
                         );
@@ -256,7 +269,7 @@
                     return '';
             }
         },
-        getStatusText: function(game) {
+        getStatusText: function (game) {
             switch (game.state) {
                 case 0:
                     return (
@@ -286,7 +299,7 @@
                     return '';
             }
         },
-        openGameDialog: function(game) {
+        openGameDialog: function (game) {
             game = game || {};
             game.new = !game.hasOwnProperty('id');
 
@@ -315,10 +328,9 @@
                                     }),
                                     $('<h4>', {
                                         class: 'modal-title',
-                                        text:
-                                            game.new === true
-                                                ? 'Create new game'
-                                                : 'Edit game'
+                                        text: game.new === true ?
+                                            'Create new game' :
+                                            'Edit game'
                                     })
                                 ]
                             }),
@@ -339,33 +351,25 @@
                                                             $('<input>', {
                                                                 disabled: !game.new,
                                                                 type: 'text',
-                                                                class:
-                                                                    'form-control',
-                                                                'data-form-key':
-                                                                    'name'
+                                                                class: 'form-control',
+                                                                'data-form-key': 'name'
                                                             }),
                                                             $('<label>', {
-                                                                text:
-                                                                    'Date and time'
+                                                                text: 'Date and time'
                                                             }),
                                                             $('<input>', {
                                                                 disabled: !game.new,
-                                                                type:
-                                                                    'datetime-local',
-                                                                class:
-                                                                    'form-control',
-                                                                'data-form-key':
-                                                                    'date'
+                                                                type: 'datetime-local',
+                                                                class: 'form-control',
+                                                                'data-form-key': 'date'
                                                             }),
                                                             $('<label>', {
                                                                 text: 'Location'
                                                             }),
                                                             $('<select>', {
                                                                 disabled: !game.new,
-                                                                class:
-                                                                    'form-control',
-                                                                'data-form-key':
-                                                                    'location'
+                                                                class: 'form-control',
+                                                                'data-form-key': 'location'
                                                             }),
                                                             $('<label>', {
                                                                 text: 'Players'
@@ -383,56 +387,54 @@
                                 html: [
                                     $('<div>', {
                                         html: [
-                                            game.new === true
-                                                ? $('<button>', {
-                                                      type: 'button',
-                                                      class:
-                                                          'btn btn-primary float-right',
-                                                      text: 'Create',
-                                                      click: function() {
-                                                          var $btn = $(this);
-                                                          fbc.base.element.disable(
-                                                              $btn
-                                                          );
-
-                                                          var $modal = $btn.closest(
-                                                              '.modal'
-                                                          );
-
-                                                          var data = fbc.games.gatherGameInfo(
-                                                              $modal
-                                                                  .find(
-                                                                      $(
-                                                                          '#game-info'
-                                                                      )
-                                                                  )
-                                                                  .first()
-                                                          );
-
-                                                          fbc.games.postNew(
-                                                              data,
-                                                              function() {
-                                                                  $modal.modal(
-                                                                      'hide'
-                                                                  );
-                                                              },
-                                                              function() {
-                                                                  fbc.base.element.enable(
-                                                                      $btn
-                                                                  );
-                                                              }
-                                                          );
-                                                      }
-                                                  })
-                                                : null,
+                                            game.new === true ?
                                             $('<button>', {
                                                 type: 'button',
-                                                class:
-                                                    'btn btn-danger float-right',
+                                                class: 'btn btn-primary float-right',
+                                                text: 'Create',
+                                                click: function () {
+                                                    var $btn = $(this);
+                                                    fbc.base.element.disable(
+                                                        $btn
+                                                    );
+
+                                                    var $modal = $btn.closest(
+                                                        '.modal'
+                                                    );
+
+                                                    var data = fbc.games.gatherGameInfo(
+                                                        $modal
+                                                        .find(
+                                                            $(
+                                                                '#game-info'
+                                                            )
+                                                        )
+                                                        .first()
+                                                    );
+
+                                                    fbc.games.postNew(
+                                                        data,
+                                                        function () {
+                                                            $modal.modal(
+                                                                'hide'
+                                                            );
+                                                        },
+                                                        function () {
+                                                            fbc.base.element.enable(
+                                                                $btn
+                                                            );
+                                                        }
+                                                    );
+                                                }
+                                            }) :
+                                            null,
+                                            $('<button>', {
+                                                type: 'button',
+                                                class: 'btn btn-danger float-right',
                                                 'data-dismiss': 'modal',
-                                                text: game.new
-                                                    ? 'Cancel'
-                                                    : 'Close'
+                                                text: game.new ?
+                                                    'Cancel' :
+                                                    'Close'
                                             })
                                         ]
                                     })
@@ -450,7 +452,7 @@
                 .first();
 
             locationSelect.html(
-                $.map(fbc.locations.getList(), function(item) {
+                $.map(fbc.locations.getList(), function (item) {
                     return $('<option>', {
                         value: item.id,
                         text: item.name
@@ -499,15 +501,15 @@
                 dialog.find('select[data-form-key="player"]')
             );
 
-            dialog.on('change', 'select[data-form-key="player"]', function(e) {
+            dialog.on('change', 'select[data-form-key="player"]', function (e) {
                 var $target = $(e.currentTarget);
 
-                var successCallback = function() {
+                var successCallback = function () {
                     var $playerSelects = dialog.find(
                         'select[data-form-key="player"]'
                     );
 
-                    var $emptySelections = $playerSelects.filter(function() {
+                    var $emptySelections = $playerSelects.filter(function () {
                         return $(this).val() === '';
                     });
 
@@ -535,16 +537,16 @@
             dialog.modal();
 
             if (!game.new) {
-                dialog.one('hidden.bs.modal', function() {
+                dialog.one('hidden.bs.modal', function () {
                     fbc.games.update(fbc.games.updateTable);
                 });
             }
 
-            dialog.one('hidden.bs.modal', function() {
+            dialog.one('hidden.bs.modal', function () {
                 dialog.remove();
             });
         },
-        confirmFormTeams: function(gameId) {
+        confirmFormTeams: function (gameId) {
             fbc.base.showDialog({
                 header: 'Form teams',
                 body: [
@@ -552,7 +554,7 @@
                         text: 'Players:'
                     }),
                     $('<ul>', {
-                        html: $.map(fbc.games.dict[gameId].players, function(
+                        html: $.map(fbc.games.dict[gameId].players, function (
                             player
                         ) {
                             return $('<li>', {
@@ -566,7 +568,7 @@
                         type: 'button',
                         class: 'btn btn-primary float-right',
                         text: 'Form',
-                        click: function() {
+                        click: function () {
                             var $btn = $(this);
                             fbc.base.element.disable($btn);
 
@@ -574,10 +576,10 @@
 
                             fbc.games.formTeams(
                                 gameId,
-                                function() {
+                                function () {
                                     $modal.modal('hide');
                                 },
-                                function() {
+                                function () {
                                     fbc.base.element.enable($btn);
                                 }
                             );
@@ -587,7 +589,7 @@
                 closeButton: 'Cancel'
             });
         },
-        gatherGameInfo: function($element) {
+        gatherGameInfo: function ($element) {
             var name = $element
                 .children('input[data-form-key="name"]')
                 .first()
@@ -605,10 +607,10 @@
 
             var players = $element
                 .children('select[data-form-key="player"]')
-                .filter(function() {
+                .filter(function () {
                     return $(this).val() !== '';
                 })
-                .map(function() {
+                .map(function () {
                     return {
                         id: parseInt($(this).val())
                     };
@@ -622,7 +624,7 @@
                 players: players
             };
         },
-        postNew: function(data, successCallback, errorCallback) {
+        postNew: function (data, successCallback, errorCallback) {
             $.ajax({
                 url: fbc.base.parameters.server + 'API/games/',
                 method: 'POST',
@@ -631,7 +633,7 @@
                     Authorization: 'Token ' + fbc.base.parameters.token
                 },
                 data: JSON.stringify(data),
-                success: function(data) {
+                success: function (data) {
                     fbc.games.dict[data.id] = data;
                     fbc.games.updateTable();
 
@@ -639,14 +641,14 @@
                         successCallback(data);
                     }
                 },
-                error: function(xhr, status, error) {
+                error: function (xhr, status, error) {
                     if ($.isFunction(errorCallback)) {
                         errorCallback(xhr, status, error);
                     }
                 }
             });
         },
-        confirmRemoveGame: function(game) {
+        confirmRemoveGame: function (game) {
             fbc.base.showDialog({
                 header: 'Remove game',
                 body: [
@@ -657,18 +659,16 @@
                         text: 'Name: ' + game.name
                     }),
                     $('<p>', {
-                        text:
-                            'Location: ' +
-                            (game.location_repr !== null
-                                ? game.location_repr.name
-                                : '')
+                        text: 'Location: ' +
+                            (game.location_repr !== null ?
+                                game.location_repr.name :
+                                '')
                     }),
                     $('<p>', {
-                        text:
-                            'Date: ' +
-                            (game.date !== null
-                                ? new Date(game.date).toLocaleString()
-                                : '')
+                        text: 'Date: ' +
+                            (game.date !== null ?
+                                new Date(game.date).toLocaleString() :
+                                '')
                     })
                 ],
                 buttons: [
@@ -676,16 +676,16 @@
                         type: 'button',
                         class: 'btn btn-primary float-right',
                         text: 'Remove',
-                        click: function() {
+                        click: function () {
                             var $btn = $(this);
                             fbc.base.element.disable($btn);
 
                             fbc.games.removeGame(
                                 game.id,
-                                function() {
+                                function () {
                                     $btn.closest('.modal').modal('hide');
                                 },
-                                function() {
+                                function () {
                                     fbc.base.element.enable($btn);
                                 }
                             );
@@ -695,14 +695,14 @@
                 closeButton: 'Cancel'
             });
         },
-        removeGame: function(gameId, successCallback, errorCallback) {
+        removeGame: function (gameId, successCallback, errorCallback) {
             $.ajax({
                 url: fbc.base.parameters.server + 'API/games/' + gameId + '/',
                 method: 'DELETE',
                 headers: {
                     Authorization: 'Token ' + fbc.base.parameters.token
                 },
-                success: function(data) {
+                success: function (data) {
                     delete fbc.games.dict[gameId];
                     fbc.games.updateTable();
 
@@ -710,14 +710,14 @@
                         successCallback(data);
                     }
                 },
-                error: function(xhr, status, error) {
+                error: function (xhr, status, error) {
                     if ($.isFunction(errorCallback)) {
                         errorCallback(xhr, status, error);
                     }
                 }
             });
         },
-        playerChange: function(gameId, $select, successCallback) {
+        playerChange: function (gameId, $select, successCallback) {
             var messageColor = '';
             var successValue = null;
 
@@ -748,8 +748,7 @@
             }
 
             $.ajax({
-                url:
-                    fbc.base.parameters.server +
+                url: fbc.base.parameters.server +
                     'API/games/' +
                     gameId +
                     '/' +
@@ -763,13 +762,13 @@
                 data: JSON.stringify({
                     id: playerId
                 }),
-                beforeSend: function() {
+                beforeSend: function () {
                     fbc.base.element.disable($select);
                 },
-                complete: function(xhr, status) {
+                complete: function (xhr, status) {
                     fbc.base.element.enable($select);
                 },
-                success: function(data) {
+                success: function (data) {
                     var $msg = $('<p>', {
                         css: {
                             color: messageColor
@@ -799,12 +798,12 @@
                         successCallback();
                     }
                 },
-                error: function(xhr, status, error) {
+                error: function (xhr, status, error) {
                     $select.val($select.data('value'));
                 }
             });
         },
-        patchGame: function(gameId, data, successCallback, errorCallback) {
+        patchGame: function (gameId, data, successCallback, errorCallback) {
             $.ajax({
                 url: fbc.base.parameters.server + 'API/games/' + gameId + '/',
                 method: 'PATCH',
@@ -813,7 +812,7 @@
                     Authorization: 'Token ' + fbc.base.parameters.token
                 },
                 data: JSON.stringify(data),
-                success: function(data) {
+                success: function (data) {
                     fbc.games.dict[gameId] = data;
                     fbc.games.updateTable();
 
@@ -821,14 +820,14 @@
                         successCallback(data);
                     }
                 },
-                error: function(xhr, status, error) {
+                error: function (xhr, status, error) {
                     if ($.isFunction(errorCallback)) {
                         errorCallback(xhr, status, error);
                     }
                 }
             });
         },
-        getPlayerSelect: function(players, value) {
+        getPlayerSelect: function (players, value) {
             var $select = $('<select>', {
                 class: 'form-control',
                 'data-form-key': 'player',
@@ -839,7 +838,7 @@
             });
 
             $select.append(
-                $.map(players, function(player) {
+                $.map(players, function (player) {
                     return $('<option>', {
                         value: player.id,
                         text: player.name + ' (' + player.score + ')'
@@ -852,13 +851,13 @@
 
             return $select;
         },
-        openEnterResultDialog: function(game) {
+        openEnterResultDialog: function (game) {
             var $saveButton = $('<button>', {
                 type: 'button',
                 disabled: true,
                 class: 'btn btn-primary float-right disabled',
                 text: 'Save result',
-                click: function() {
+                click: function () {
                     var $btn = $(this);
 
                     fbc.base.element.disable($btn);
@@ -879,17 +878,17 @@
                     fbc.games.patchGame(
                         game.id,
                         data,
-                        function() {
+                        function () {
                             $modal.modal('hide');
                         },
-                        function() {
+                        function () {
                             fbc.base.element.enable($btn);
                         }
                     );
                 }
             });
 
-            var changeActiveButton = function($btn) {
+            var changeActiveButton = function ($btn) {
                 $btn
                     .parent()
                     .siblings()
@@ -916,12 +915,12 @@
                                     }),
                                     $('<ul>', {
                                         html: $.map(
-                                            $.grep(game.players, function(
+                                            $.grep(game.players, function (
                                                 player
                                             ) {
                                                 return player.team === 1;
                                             }),
-                                            function(player) {
+                                            function (player) {
                                                 return $('<li>', {
                                                     text: player.name
                                                 });
@@ -938,12 +937,12 @@
                                     }),
                                     $('<ul>', {
                                         html: $.map(
-                                            $.grep(game.players, function(
+                                            $.grep(game.players, function (
                                                 player
                                             ) {
                                                 return player.team === 2;
                                             }),
-                                            function(player) {
+                                            function (player) {
                                                 return $('<li>', {
                                                     text: player.name
                                                 });
@@ -969,7 +968,7 @@
                                             html: $('<button>', {
                                                 type: 'button',
                                                 class: 'btn btn-default',
-                                                click: function() {
+                                                click: function () {
                                                     changeActiveButton($(this));
                                                 },
                                                 'data-team1-score': 2,
@@ -983,7 +982,7 @@
                                             html: $('<button>', {
                                                 type: 'button',
                                                 class: 'btn btn-default',
-                                                click: function() {
+                                                click: function () {
                                                     changeActiveButton($(this));
                                                 },
                                                 'data-team1-score': 2,
@@ -997,7 +996,7 @@
                                             html: $('<button>', {
                                                 type: 'button',
                                                 class: 'btn btn-default',
-                                                click: function() {
+                                                click: function () {
                                                     changeActiveButton($(this));
                                                 },
                                                 'data-team1-score': 1,
@@ -1011,7 +1010,7 @@
                                             html: $('<button>', {
                                                 type: 'button',
                                                 class: 'btn btn-default',
-                                                click: function() {
+                                                click: function () {
                                                     changeActiveButton($(this));
                                                 },
                                                 'data-team1-score': 0,
@@ -1029,7 +1028,7 @@
                 closeButton: 'Cancel'
             });
         },
-        formTeams: function(gameId, successCallback, errorCallback) {
+        formTeams: function (gameId, successCallback, errorCallback) {
             $.ajax({
                 url: fbc.base.parameters.server + 'API/games/' + gameId + '/create_teams/',
                 method: 'POST',

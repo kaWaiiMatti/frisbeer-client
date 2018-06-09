@@ -29,7 +29,7 @@ table > thead > tr > th[data-sort-type] > span.glyphicon {
 }
 
 /* BUTTONS ON TOP OF EACH OTHER */
-td > input[type="button"],
+td > input[type='button'],
 td > button {
     margin-bottom: 10px;
 }

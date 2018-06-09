@@ -98,7 +98,7 @@
                                 text: 'Name'
                             }),
                             $('<input>', {
-                                name: "newLocation",
+                                name: 'newLocation',
                                 class: 'form-control',
                                 'data-form-key': 'name'
                             }),
@@ -106,7 +106,7 @@
                                 text: 'Latitude'
                             }),
                             $('<input>', {
-                                name: "newLocation",
+                                name: 'newLocation',
                                 class: 'form-control',
                                 type: 'number',
                                 step: 0.00001,
@@ -116,7 +116,7 @@
                                 text: 'Longitude'
                             }),
                             $('<input>', {
-                                name: "newLocation",
+                                name: 'newLocation',
                                 class: 'form-control',
                                 type: 'number',
                                 step: 0.00001,
