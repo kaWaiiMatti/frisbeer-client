@@ -29,7 +29,7 @@ table > thead > tr > th[data-sort-type] > span.glyphicon {
 }
 
 /* BUTTONS ON TOP OF EACH OTHER */
-td > input[type="button"],
+td > input[type='button'],
 td > button {
     margin-bottom: 10px;
 }
@@ -37,6 +37,11 @@ td > button {
 /* RANK IMAGES */
 #players-table img {
     max-height: 2.25em;
+}
+
+/* PLAYERS TABLE SPECIFIC */
+#players-table[data-show-no-rank='false'] > tbody > tr[data-no-rank='true'] {
+    display: none;
 }
 
 /* MODALS */
