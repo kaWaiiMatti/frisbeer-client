@@ -287,7 +287,7 @@
                         game.team2_score +
                         ' is waiting for confirmation'
                     );
-                case 4:
+                case 3:
                     return (
                         'Result ' +
                         game.team1_score +
