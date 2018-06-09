@@ -875,16 +875,15 @@
                         state: 2
                     };
 
-                    fbc.games.patchGame(
-                        game.id,
-                        data,
-                        function () {
-                            $modal.modal('hide');
-                        },
-                        function () {
+                    fbc.games.patchGame(game.id, data, function() {
+                            fbc.games.patchGame(game.id, { state: 3 }, function() {
+                                    $modal.modal('hide');
+                                }, function() {
+                                    $modal.modal('hide');
+                                });
+                        }, function() {
                             fbc.base.element.enable($btn);
-                        }
-                    );
+                        });
                 }
             });
 
