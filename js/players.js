@@ -17,6 +17,13 @@
                 fbc.players.update(fbc.players.updateTable);
             });
 
+            $('#show-players-without-rank').click(function() {
+                $(this)
+                    .children('span')
+                    .toggleClass('glyphicon-check')
+                    .toggleClass('glyphicon-unchecked');
+            });
+
             $('#players-table')
                 .find('thead > tr > th[data-sort-type]')
                 .click(function() {

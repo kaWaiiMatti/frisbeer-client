@@ -62,7 +62,7 @@ select + select {
 }
 
 button.float-right + button.float-right {
-    margin-right: 15px;
+    margin-right: 6px;
 }
 
 .error-text {
