@@ -39,6 +39,11 @@ td > button {
     max-height: 2.25em;
 }
 
+/* PLAYERS TABLE SPECIFIC */
+#players-table[data-show-no-rank='false'] > tbody > tr[data-no-rank='true'] {
+    display: none;
+}
+
 /* MODALS */
 select + select {
     margin-top: 10px;
@@ -62,7 +67,7 @@ select + select {
 }
 
 button.float-right + button.float-right {
-    margin-right: 15px;
+    margin-right: 6px;
 }
 
 .error-text {

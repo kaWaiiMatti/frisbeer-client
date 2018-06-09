@@ -11,10 +11,20 @@
         },
         initialize: function() {
             ///<summary>Players initialization</summary>
+            var showNoRank = fbc.base.cookies.get('fbc.players.show-no-rank');
+
+            if (showNoRank !== '') {
+                fbc.players.setShowNoRank(showNoRank === 'true', false);
+            }
+
             $('#add-new-player').click(fbc.players.openNewDialog);
 
             $('#refresh-players').click(function() {
                 fbc.players.update(fbc.players.updateTable);
+            });
+
+            $('#show-players-without-rank').click(function() {
+                fbc.players.toggleShowNoRank();
             });
 
             $('#players-table')
@@ -67,6 +77,7 @@
                 .html(
                     $.map(players, function(elem) {
                         return $('<tr>', {
+                            'data-no-rank': elem.rank === null,
                             html: [
                                 $('<td>', {
                                     html: $('<img>', {
@@ -233,6 +244,21 @@
                     }
                 }
             });
+        },
+        toggleShowNoRank: function() {
+            var currentState =
+                $('#players-table').attr('data-show-no-rank') === 'true';
+            fbc.players.setShowNoRank(!currentState, true);
+        },
+        setShowNoRank: function(state, setCookie) {
+            $('#show-players-without-rank')
+                .children('span')
+                .first()
+                .toggleClass('glyphicon-check', state)
+                .toggleClass('glyphicon-unchecked', !state);
+
+            fbc.base.cookies.set('fbc.players.show-no-rank', state, 365);
+            $('#players-table').attr('data-show-no-rank', state);
         }
     };
 })(fbc);
