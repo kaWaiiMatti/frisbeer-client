@@ -584,9 +584,8 @@
 
                             var $modal = $btn.closest('.modal');
 
-                            fbc.games.patchGame(
+                            fbc.games.formTeams(
                                 gameId,
-                                { state: 1 },
                                 function() {
                                     $modal.modal('hide');
                                 },
@@ -1069,10 +1068,31 @@
                         ]
                     })
                 ],
-                buttons: [
-                    $saveButton
-                ],
+                buttons: [$saveButton],
                 closeButton: 'Cancel'
+            });
+        },
+        formTeams: function(gameId, successCallback, errorCallback) {
+            $.ajax({
+                url: fbc.base.parameters.server + 'API/games/' + gameId + '/create_teams/',
+                method: 'POST',
+                contentType: 'application/json',
+                headers: {
+                    Authorization: 'Token ' + fbc.base.parameters.token
+                },
+                success: function (data) {
+                    fbc.games.dict[data.id] = data;
+                    fbc.games.updateTable();
+
+                    if ($.isFunction(successCallback)) {
+                        successCallback(data);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    if ($.isFunction(errorCallback)) {
+                        errorCallback(xhr, status, error);
+                    }
+                }
             });
         }
     };
