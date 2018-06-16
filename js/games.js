@@ -978,6 +978,36 @@
                     }
                 }
             });
+        },
+        getPlayerWinLossDictionary: function(seasonId) {
+            var data = {};
+
+            for(var playerId in fbc.players.dict) {
+                data[playerId] = {
+                    wins: 0,
+                    losses: 0
+                };
+            }
+
+            for(var gameId in fbc.games.dict) {
+                var game = fbc.games.dict[gameId];
+
+                if(game.season !== seasonId) {
+                    continue;
+                }
+
+                var winner = game.team1_score === 2 ? 1 : 2;
+
+                for(var player of game.players) {
+                    if(player.team === winner) {
+                        data[player.id].wins++;
+                    } else {
+                        data[player.id].losses++;
+                    }
+                }
+            }
+
+            return data;
         }
     };
 })(fbc);

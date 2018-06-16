@@ -14,9 +14,10 @@ $(document).ready(function() {
 (function(fbc) {
     fbc.base = {
         parameters: {
-            server: 'https://t3mu.kapsi.fi/frisbeer/',
+            server: 'http://127.0.0.1:8000/',
             token: '',
-            maxPlayers: 6
+            maxPlayers: 6,
+            seasonId: 3
         },
 
         ol: {

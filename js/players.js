@@ -71,6 +71,8 @@
             players.sort(fbc.base.sorting.score);
             players.reverse();
 
+            var winLossData = fbc.games.getPlayerWinLossDictionary(fbc.base.parameters.seasonId);
+
             $('#players-table')
                 .children('tbody')
                 .first()
@@ -95,7 +97,7 @@
                                     text: elem.name
                                 }),
                                 $('<td>', {
-                                    text: elem.score
+                                    text: elem.score + ' (' + winLossData[elem.id].wins + '/' + winLossData[elem.id].losses + ')'
                                 })
                             ]
                         });
